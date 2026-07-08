@@ -161,13 +161,13 @@ Your generated `config.nix` lives outside this repo (at
 **macOS / Linux / inside a WSL distro:**
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/allanjeo/dotfiles/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/punk-raven/dotnix/main/install.sh | sh
 ```
 
 **Windows (elevated / Administrator PowerShell):**
 
 ```powershell
-irm https://raw.githubusercontent.com/allanjeo/dotfiles/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/punk-raven/dotnix/main/install.ps1 | iex
 ```
 
 The installer detects your `system`, prompts for `username`, `homeDirectory`,

@@ -5,7 +5,7 @@
 # All package logic lives in install.sh so Windows and Linux never diverge.
 #
 # Run from an ADMIN PowerShell:
-#   irm https://raw.githubusercontent.com/allanjeo/dotfiles/main/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/punk-raven/dotnix/main/install.ps1 | iex
 #
 # Requires Windows 10 21H2+ / Windows 11, virtualization enabled in BIOS/UEFI.
 # WSLg (bundled with recent WSL) gives GUI apps a display; a headless install
@@ -15,7 +15,7 @@ $ErrorActionPreference = 'Stop'
 
 $Distro    = if ($env:WSL_DISTRO_NAME2) { $env:WSL_DISTRO_NAME2 } else { 'Ubuntu' }
 $RawScript = if ($env:DOTFILES_INSTALL_URL) { $env:DOTFILES_INSTALL_URL } `
-             else { 'https://raw.githubusercontent.com/allanjeo/dotfiles/main/install.sh' }
+             else { 'https://raw.githubusercontent.com/punk-raven/dotnix/main/install.sh' }
 
 function Test-Admin {
   $id = [Security.Principal.WindowsIdentity]::GetCurrent()

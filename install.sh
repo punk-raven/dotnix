@@ -6,7 +6,7 @@
 # activates - via nix-darwin on macOS, standalone home-manager on Linux/WSL.
 #
 # One-liner (macOS / Linux / inside a WSL distro):
-#   curl -fsSL https://raw.githubusercontent.com/allanjeo/dotfiles/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/punk-raven/dotnix/main/install.sh | sh
 #
 # Designed to complete in a single pass on a fresh machine: right after
 # installing Nix it sources the daemon profile into the current shell, so `nix`
@@ -31,7 +31,7 @@
 
 set -eu
 
-: "${REPO_URL:=https://github.com/allanjeo/dotfiles.git}"
+: "${REPO_URL:=https://github.com/punk-raven/dotnix.git}"
 : "${DOTFILES_DIR:=$HOME/dotfiles}"
 : "${DOTFILES_BRANCH:=main}"
 : "${NIX_DAEMON_PROFILE:=/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh}"

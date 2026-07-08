@@ -1,0 +1,14 @@
+# Codex CLI configuration.
+# `hooks` must be enabled for the AXI SessionStart hooks in .codex/hooks.json to
+# fire (gh-axi / chrome-devtools-axi / lavish-axi ambient context). See nix/axi.nix.
+[features]
+hooks = true
+
+# CodeGraph MCP server - semantic code intelligence (symbols, call paths, blast
+# radius) via one codegraph_explore tool. The bare `codegraph` binary is put on
+# PATH by nix/codegraph.nix; `serve --mcp` runs the stdio MCP server, indexing
+# the current project on demand. Declarative equivalent of `codegraph install`
+# (which we do NOT run - it mutates agent config out of band).
+[mcp_servers.codegraph]
+command = "codegraph"
+args = ["serve", "--mcp"]

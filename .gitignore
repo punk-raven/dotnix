@@ -1,0 +1,14 @@
+# config.nix is generated per-user. It IS committed to your fork (the installer
+# force-adds it with `git add -f`), but ignored by default so the upstream
+# template repo never carries a real user's values. See config.example.nix.
+config.nix
+
+# no-mistakes pipeline evidence should never be committed
+.no-mistakes/
+
+# nix build / rebuild output symlinks
+result
+result-*
+
+# Lavish Editor session artifacts (local review surfaces)
+.lavish/

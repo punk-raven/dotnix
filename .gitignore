@@ -9,6 +9,3 @@ config.nix
 # nix build / rebuild output symlinks
 result
 result-*
-
-# Lavish Editor session artifacts (local review surfaces)
-.lavish/

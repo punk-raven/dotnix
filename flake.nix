@@ -12,9 +12,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    # herdr - terminal workspace manager for AI coding agents. Cross-platform
+    # flake; wired into the Linux/WSL package set (macOS gets it via Homebrew in
+    # modules/darwin.nix). Pinned to a release tag; `nix flake update herdr` bumps.
+    herdr = {
+      url = "github:ogulcancelik/herdr/v0.7.3";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, nix-darwin, home-manager, nix-homebrew, ... }:
+  outputs = { nixpkgs, nix-darwin, home-manager, nix-homebrew, herdr, ... }:
     let
       # The five prompted values + detected system. This is the single source
       # of per-user configuration; every module reads from `cfg` (threaded via
@@ -56,7 +63,10 @@
       homeConfigurations = lib.optionalAttrs (!isDarwin) {
         ${cfg.username} = home-manager.lib.homeManagerConfiguration {
           pkgs = pkgsFor cfg.system;
-          extraSpecialArgs = { inherit cfg; };
+          extraSpecialArgs = {
+            inherit cfg;
+            herdrPkg = herdr.packages.${cfg.system}.default;
+          };
           modules = [
             ./modules/common.nix
             ./modules/linux.nix

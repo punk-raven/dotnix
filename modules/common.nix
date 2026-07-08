@@ -10,13 +10,19 @@
 let
   dotfilesDir = cfg.dotfilesDir;
 
+  # Per-user config.nix lives outside the flake (see flake.nix), so `rebuild`
+  # evaluates `--impure` and points $DOTNIX_CONFIG at the real file. On macOS the
+  # rebuild runs under sudo, which scrubs the environment, so the var is passed
+  # through `sudo env`.
+  configPath = "${cfg.homeDirectory}/.config/dotnix/config.nix";
+
   # `rebuild` re-applies the config. The command differs per platform: macOS
   # goes through nix-darwin, Linux/WSL through standalone home-manager.
   rebuildAlias =
     if pkgs.stdenv.isDarwin then
-      "/run/current-system/sw/bin/darwin-rebuild switch --flake ${dotfilesDir}#${cfg.hostname}"
+      "sudo env DOTNIX_CONFIG=${configPath} /run/current-system/sw/bin/darwin-rebuild switch --impure --flake ${dotfilesDir}#${cfg.hostname}"
     else
-      "home-manager switch --flake ${dotfilesDir}#${cfg.username}";
+      "DOTNIX_CONFIG=${configPath} home-manager switch --impure --flake ${dotfilesDir}#${cfg.username}";
 in
 {
   imports = [

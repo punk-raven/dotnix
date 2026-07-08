@@ -1,6 +1,8 @@
-# config.example.nix - committed template. The installer copies this to
-# config.nix, fills in your values, and `git add -f config.nix` so the flake
-# (which ignores untracked files) can see it. Commit config.nix to YOUR fork.
+# config.example.nix - committed template. The installer writes your filled-in
+# copy to ~/.config/dotnix/config.nix (override with $DOTNIX_CONFIG) - OUTSIDE
+# this repo, so it is never committed. The flake reads it impurely from there.
+# To set it up by hand: `mkdir -p ~/.config/dotnix && cp config.example.nix
+# ~/.config/dotnix/config.nix && $EDITOR ~/.config/dotnix/config.nix`.
 #
 # Every module reads these instead of hardcoding a username or path, so this is
 # the ONLY file that differs between users/machines.

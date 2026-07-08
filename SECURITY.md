@@ -21,9 +21,12 @@ installer scripts. Security-relevant areas include:
 ## Handling Secrets
 
 Do **not** commit secrets. This repo is public and has GitHub secret scanning
-with push protection enabled. `config.nix` holds per-user, non-secret identity
-only (name, email, paths); never place tokens, keys, or passwords in it or any
-tracked file. Keep real secrets in your local environment or an ignored file.
+with push protection enabled. Per-user identity lives in `config.nix`, which is
+kept **outside** the repo (`~/.config/dotnix/config.nix`) and read impurely by
+the flake, so it is never committed. Even so, `config.nix` is for non-secret
+identity only (name, email, paths); never place tokens, keys, or passwords in it
+or any tracked file. Keep real secrets in your local environment or an ignored
+file.
 
 ## Supported Versions
 

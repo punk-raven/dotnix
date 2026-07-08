@@ -1,8 +1,11 @@
 # Working on this repo
 
 Cross-platform Nix dotfiles: one flake, three surfaces (nix-darwin, standalone
-home-manager, WSL2 -> Linux path). Per-user values live only in `config.nix`;
-every module reads them from `cfg` (threaded via specialArgs), never hardcoded.
+home-manager, WSL2 -> Linux path). Per-user values live only in `config.nix`,
+which is kept OUTSIDE the repo at `~/.config/dotnix/config.nix` (override with
+`$DOTNIX_CONFIG`) and read impurely by the flake, so a real user's values are
+never committed. Every module reads them from `cfg` (threaded via specialArgs),
+never hardcoded.
 
 ## Never run the installer for real here
 
@@ -22,20 +25,24 @@ escaping the temp sandbox.
 
 ## Validating Nix changes without building
 
-Eval, don't build (building compiles everything). To check both platforms from a
-macOS checkout, force each config's package list:
+Eval, don't build (building compiles everything). config.nix is read from
+outside the flake, so every eval needs `--impure` and a `DOTNIX_CONFIG` pointing
+at a config file. To check both platforms from a macOS checkout, force each
+config's package list:
 
 ```bash
-# darwin (uses the committed config.nix if it is aarch64-darwin)
-nix eval .#darwinConfigurations.<host>.config.home-manager.users.<user>.home.packages --apply 'x: builtins.length x'
+# darwin (DOTNIX_CONFIG's config.nix must have an aarch64-darwin system)
+DOTNIX_CONFIG=~/.config/dotnix/config.nix \
+  nix eval --impure .#darwinConfigurations.<host>.config.home-manager.users.<user>.home.packages --apply 'x: builtins.length x'
 
-# linux: temporarily point config.nix at an x86_64-linux system, then
-nix eval .#homeConfigurations.<user>.config.home.packages --apply 'x: builtins.length x'
+# linux: point DOTNIX_CONFIG at a config.nix whose system is x86_64-linux, then
+DOTNIX_CONFIG=/tmp/linux-config.nix \
+  nix eval --impure .#homeConfigurations.<user>.config.home.packages --apply 'x: builtins.length x'
 ```
 
 `darwinConfigurations` is only populated on a darwin `system`, `homeConfigurations`
-only on non-darwin (see `flake.nix`), so swap `config.nix`'s `system` to eval the
-other surface.
+only on non-darwin (see `flake.nix`), so point `DOTNIX_CONFIG` at a config.nix
+with the other `system` to eval the other surface.
 
 ## Agent-tooling version bumps
 

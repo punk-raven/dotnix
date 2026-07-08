@@ -24,6 +24,8 @@
 #   DARWIN_REBUILD_BIN  darwin-rebuild path       (default: the real one)
 #   DOTFILES_NONINTERACTIVE  set to 1 to accept every default with no prompt
 #   DOTFILES_HEADLESS   true|false, skip GUI apps on Linux/WSL (default: false)
+#   DOTNIX_CONFIG       path to the per-user config.nix, kept OUTSIDE the repo so
+#                       it is never committed (default: ~/.config/dotnix/config.nix)
 #   GIT_WAIT_TIMEOUT    seconds to wait for git   (default: 1800, macOS CLT)
 #   GIT_WAIT_INTERVAL   git poll interval seconds (default: 5)
 
@@ -37,6 +39,9 @@ set -eu
 : "${DOTFILES_HEADLESS:=false}"
 : "${GIT_WAIT_TIMEOUT:=1800}"
 : "${GIT_WAIT_INTERVAL:=5}"
+# Per-user config lives outside the flake's git tree so it is never committed to
+# a shared/template repo. The flake reads it impurely via this path (flake.nix).
+: "${DOTNIX_CONFIG:=${XDG_CONFIG_HOME:-$HOME/.config}/dotnix/config.nix}"
 
 OS=$(uname -s)
 
@@ -104,12 +109,14 @@ clone_or_update() {
 }
 
 # 4. Prompt for the per-user values (pre-filled from an existing config.nix on a
-#    re-run) and write config.nix, then force-add it so the flake can see it.
+#    re-run) and write config.nix OUTSIDE the repo (see DOTNIX_CONFIG), so the
+#    flake reads it impurely and it is never committed to a shared checkout.
 generate_config() {
   . "$DOTFILES_DIR/lib/prompt.sh"
 
   _system=$(detect_system)
-  _cfg="$DOTFILES_DIR/config.nix"
+  _cfg="$DOTNIX_CONFIG"
+  mkdir -p "$(dirname "$_cfg")"
 
   # Resolve defaults, preferring an existing config.nix value, else auto-detect.
   _def_user=$(config_value "$_cfg" username); [ -n "$_def_user" ] || _def_user=$(id -un)
@@ -127,8 +134,7 @@ generate_config() {
     "$_username" "$_homedir" "$DOTFILES_DIR" \
     "$_gitname" "$_gitemail" "$_system" "$_def_host" "$DOTFILES_HEADLESS"
 
-  git -C "$DOTFILES_DIR" add -f config.nix
-  echo "Wrote $_cfg"
+  echo "Wrote $_cfg (outside the repo; the flake reads it via \$DOTNIX_CONFIG)"
   SYSTEM="$_system"
   HOSTNAME="$_def_host"
   USERNAME="$_username"
@@ -136,23 +142,28 @@ generate_config() {
 
 # 5. Activate. macOS -> nix-darwin; Linux/WSL -> standalone home-manager.
 activate() {
+  # config.nix lives outside the flake, so every activation evaluates `--impure`
+  # and must see $DOTNIX_CONFIG. On macOS the rebuild runs under sudo, which
+  # scrubs the environment, so pass the var explicitly through `sudo env`.
   if [ "$OS" = "Darwin" ]; then
     if [ -x "$DARWIN_REBUILD_BIN" ]; then
-      sudo "$DARWIN_REBUILD_BIN" switch --flake "$DOTFILES_DIR#$HOSTNAME"
+      sudo env DOTNIX_CONFIG="$DOTNIX_CONFIG" \
+        "$DARWIN_REBUILD_BIN" switch --impure --flake "$DOTFILES_DIR#$HOSTNAME"
     else
       # First activation: darwin-rebuild doesn't exist yet, fetch it via nix run.
       # Resolve nix by absolute path (sudo won't inherit the sourced PATH) and
       # enable the experimental features it needs.
       _nix=$(command -v nix || echo /nix/var/nix/profiles/default/bin/nix)
-      sudo "$_nix" --extra-experimental-features "nix-command flakes" \
-        run nix-darwin/master#darwin-rebuild -- switch --flake "$DOTFILES_DIR#$HOSTNAME"
+      sudo env DOTNIX_CONFIG="$DOTNIX_CONFIG" \
+        "$_nix" --extra-experimental-features "nix-command flakes" \
+        run nix-darwin/master#darwin-rebuild -- switch --impure --flake "$DOTFILES_DIR#$HOSTNAME"
     fi
   else
     # Standalone home-manager. `-b backup` renames any pre-existing plain file it
     # would replace, matching the darwin module's backupFileExtension.
     _nix=$(command -v nix || echo /nix/var/nix/profiles/default/bin/nix)
-    "$_nix" --extra-experimental-features "nix-command flakes" \
-      run github:nix-community/home-manager -- switch -b backup --flake "$DOTFILES_DIR#$USERNAME"
+    DOTNIX_CONFIG="$DOTNIX_CONFIG" "$_nix" --extra-experimental-features "nix-command flakes" \
+      run github:nix-community/home-manager -- switch -b backup --impure --flake "$DOTFILES_DIR#$USERNAME"
   fi
 }
 

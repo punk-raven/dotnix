@@ -23,10 +23,25 @@
 
   outputs = { nixpkgs, nix-darwin, home-manager, nix-homebrew, herdr, ... }:
     let
-      # The five prompted values + detected system. This is the single source
-      # of per-user configuration; every module reads from `cfg` (threaded via
+      # The prompted values + detected system. This is the single source of
+      # per-user configuration; every module reads from `cfg` (threaded via
       # specialArgs / extraSpecialArgs) instead of hardcoding anything.
-      cfg = import ./config.nix;
+      #
+      # config.nix lives OUTSIDE this repo (default
+      # ~/.config/dotnix/config.nix, override with $DOTNIX_CONFIG) so a real
+      # user's values are never committed to a shared/template checkout. Reading
+      # a path outside the flake requires impure evaluation, so every activation
+      # command passes `--impure` (see install.sh and the `rebuild` alias in
+      # modules/common.nix).
+      cfg = import (
+        let
+          explicit = builtins.getEnv "DOTNIX_CONFIG";
+          xdg = builtins.getEnv "XDG_CONFIG_HOME";
+          home = builtins.getEnv "HOME";
+          base = if xdg != "" then xdg else "${home}/.config";
+        in
+        if explicit != "" then explicit else "${base}/dotnix/config.nix"
+      );
       lib = nixpkgs.lib;
       isDarwin = lib.hasSuffix "darwin" cfg.system;
 

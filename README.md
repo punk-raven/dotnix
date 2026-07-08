@@ -155,7 +155,8 @@ GUI apps display through WSLg; alternatively use a Windows-side browser for
 
 ## Install
 
-Clone this repo first (you commit your generated `config.nix` to your fork).
+Your generated `config.nix` lives outside this repo (at
+`~/.config/dotnix/config.nix`), so nothing personal is ever committed.
 
 **macOS / Linux / inside a WSL distro:**
 
@@ -171,8 +172,8 @@ irm https://raw.githubusercontent.com/allanjeo/dotfiles/main/install.ps1 | iex
 
 The installer detects your `system`, prompts for `username`, `homeDirectory`,
 `gitName`, and `gitEmail` (press enter to accept the auto-detected defaults),
-writes `config.nix`, `git add -f`s it so the flake can see it, and activates.
-Re-running re-prompts with your existing values as defaults.
+writes `~/.config/dotnix/config.nix`, and activates. Re-running re-prompts with
+your existing values as defaults.
 
 **After it finishes**, load Nix into your current shell (a brand-new install is
 not on the `PATH` of the shell that started before Nix existed):
@@ -188,34 +189,31 @@ not on the `PATH` of the shell that started before Nix existed):
 
 ## How `config.nix` is generated
 
-`config.nix` holds the six per-user values and is the only file that differs
-between machines. It is **git-ignored** so this repo never carries a real user's
-values - you generate your own.
+`config.nix` holds the per-user values and is the only file that differs between
+machines. It lives **outside this repo** at `~/.config/dotnix/config.nix`
+(override with `$DOTNIX_CONFIG`), so a real user's values are never committed to
+a shared or template checkout.
 
 **Two ways to create it:**
 
 1. **Automatic (installer).** `install.sh` detects `system`, prompts for
    `username`, `homeDirectory`, `gitName`, `gitEmail` (auto-detected defaults;
-   press enter to accept), fills in `hostname` + `headless`, and writes it.
+   press enter to accept), fills in `hostname` + `headless`, and writes it to
+   `~/.config/dotnix/config.nix`.
 2. **Manual.** Copy the template and edit:
    ```sh
-   cp config.example.nix config.nix
-   $EDITOR config.nix
+   mkdir -p ~/.config/dotnix
+   cp config.example.nix ~/.config/dotnix/config.nix
+   $EDITOR ~/.config/dotnix/config.nix
    ```
 
-**Why it is force-added.** A Nix flake in a git repo ignores *untracked* files,
-so a freshly written `config.nix` is invisible to `nix build` / `darwin-rebuild`
-until it is in git's index. The installer therefore runs `git add -f config.nix`
-(the `.gitignore` entry only guards the template; `-f` overrides it). Doing it
-manually:
-
-```sh
-git add -f config.nix
-```
-
-Commit it to your fork so your machine stays reproducible. *(Alternative: leave
-it untracked and build with `--impure` + an absolute path - less reproducible, so
-tracked-file is the default.)*
+**Why it is read impurely.** A Nix flake only sees files inside its own git
+tree, so config kept *inside* the repo would have to be committed (leaking your
+values) or `git add -f`ed (one accidental commit from leaking). Keeping it
+outside the tree avoids that entirely - the flake reads it via
+`builtins.getEnv "DOTNIX_CONFIG"`, which requires impure evaluation. Every
+activation command therefore passes `--impure` (the `rebuild` alias and the
+installer already do this for you).
 
 ---
 
@@ -240,9 +238,8 @@ tracked-file is the default.)*
 ## Repository layout
 
 ```
-flake.nix                 darwinConfigurations + homeConfigurations, imports config.nix
-config.nix                generated per-user (git-ignored template guard; force-added)
-config.example.nix        committed template with placeholders
+flake.nix                 darwinConfigurations + homeConfigurations, reads config.nix impurely
+config.example.nix        committed template; real config.nix lives in ~/.config/dotnix/ (out of tree)
 modules/
   common.nix              SHARED: packages, git/zsh/starship, dotfile symlinks
   darwin.nix              macOS-only: homebrew, system.defaults, nix-homebrew
@@ -260,12 +257,16 @@ tests/install_test.sh     hermetic PATH-masked stub test
 
 ## Applying changes
 
-Edit the Nix config, then run `rebuild` (aliased per platform), or directly:
+Edit the Nix config, then run `rebuild` (aliased per platform). Because
+`config.nix` is read from outside the flake, direct invocations need `--impure`
+and `$DOTNIX_CONFIG` in the environment (`rebuild` sets both for you):
 
 ```sh
-# macOS
-darwin-rebuild switch --flake ~/dotfiles#<hostname>
+# macOS (sudo scrubs the env, so pass the var through `sudo env`)
+sudo env DOTNIX_CONFIG=~/.config/dotnix/config.nix \
+  darwin-rebuild switch --impure --flake ~/dotfiles#<hostname>
 
 # Linux / WSL
-home-manager switch --flake ~/dotfiles#<username>
+DOTNIX_CONFIG=~/.config/dotnix/config.nix \
+  home-manager switch --impure --flake ~/dotfiles#<username>
 ```

@@ -187,6 +187,37 @@ not on the `PATH` of the shell that started before Nix existed):
 
 ---
 
+## Applying changes: `rebuild`
+
+After editing your config, run `rebuild` to re-apply it. The alias is identical
+on every platform - only what it expands to differs:
+
+| Platform | `rebuild` runs |
+| --- | --- |
+| 🍎 **macOS** | `darwin-rebuild switch` (via `nix-darwin`, under `sudo`) |
+| 🐧 **Linux** / 🪟 **WSL2** | `home-manager switch` (standalone) |
+
+Both pass `--impure` so the flake can read your out-of-tree
+`~/.config/dotnix/config.nix`.
+
+The `rebuild` alias only exists in shells started **after** the first successful
+activation. If it is not found yet, either open a new terminal or source the
+Nix profile first, then rebuild:
+
+```sh
+. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+rebuild
+```
+
+If the alias is still unavailable, run the raw Linux/WSL command directly:
+
+```sh
+DOTNIX_CONFIG=~/.config/dotnix/config.nix \
+  home-manager switch --impure --flake ~/dotfiles#<username>
+```
+
+---
+
 ## How `config.nix` is generated
 
 `config.nix` holds the per-user values and is the only file that differs between

@@ -88,6 +88,12 @@ in
     EDITOR = "nvim";
   };
 
+  # Install the standalone `home-manager` CLI on Linux/WSL, where `rebuild`
+  # invokes it directly. macOS goes through `darwin-rebuild` (provided by
+  # nix-darwin), which already owns the home-manager generation, so enabling
+  # the standalone CLI there would be redundant and can conflict.
+  programs.home-manager.enable = pkgs.stdenv.isLinux;
+
   programs.git = {
     enable = true;
     lfs.enable = true;

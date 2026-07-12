@@ -216,6 +216,17 @@ DOTNIX_CONFIG=~/.config/dotnix/config.nix \
   home-manager switch --impure --flake ~/dotfiles#<username>
 ```
 
+The standalone `home-manager` CLI is installed by the config itself, so it only
+exists **after** a first successful activation. If you get
+`command not found: home-manager`, bootstrap without it via `nix run` (this is
+what the installer does on the first pass):
+
+```sh
+DOTNIX_CONFIG=~/.config/dotnix/config.nix \
+  nix run github:nix-community/home-manager -- \
+  switch -b backup --impure --flake ~/dotfiles#<username>
+```
+
 ---
 
 ## How `config.nix` is generated

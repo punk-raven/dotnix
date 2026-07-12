@@ -107,6 +107,14 @@ in
     # (minified helper names), matching `npm run bundle` output, not `npm run
     # build` output.
     npmBuildScript = "bundle";
+    # The "bundle" script's rollup pass is memory-heavy. Node 22 auto-sizes
+    # V8's old-space limit from *available* RAM; under WSL2 the reported
+    # figure is small (WSL defaults to ~50% of Windows RAM and under-reports),
+    # so V8 caps the heap low and rollup dies with "Reached heap limit
+    # Allocation failed - JavaScript heap out of memory". Pin a fixed 4 GB
+    # heap so the build is deterministic across hosts regardless of how much
+    # RAM the sandbox thinks it has.
+    NODE_OPTIONS = "--max-old-space-size=4096";
     # prevent puppeteer/chromium download during build:
     PUPPETEER_SKIP_DOWNLOAD = "1";
     # buildNpmPackage always runs `npm ci --ignore-scripts`, so npm's

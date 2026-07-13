@@ -19,9 +19,17 @@
       url = "github:ogulcancelik/herdr/v0.7.3";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # nixGL - injects a working GL/EGL/Vulkan driver into Nix-built GUI apps on
+    # non-NixOS hosts. Needed on Linux/WSL, where a Nix binary (e.g. wezterm)
+    # cannot load the host's libEGL and only sees its own closure. macOS never
+    # uses it (GUI apps come from Homebrew casks). See modules/gui.nix.
+    nixgl = {
+      url = "github:nix-community/nixGL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, nix-darwin, home-manager, nix-homebrew, herdr, ... }:
+  outputs = { nixpkgs, nix-darwin, home-manager, nix-homebrew, herdr, nixgl, ... }:
     let
       # The prompted values + detected system. This is the single source of
       # per-user configuration; every module reads from `cfg` (threaded via
@@ -81,6 +89,9 @@
           extraSpecialArgs = {
             inherit cfg;
             herdrPkg = herdr.packages.${cfg.system}.default;
+            # Mesa GL/EGL wrapper for Nix GUI apps on non-NixOS/WSL. Only
+            # referenced on the Linux path, so it is never evaluated on macOS.
+            nixglPkg = nixgl.packages.${cfg.system}.nixGLIntel;
           };
           modules = [
             ./modules/common.nix

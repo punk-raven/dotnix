@@ -11,3 +11,6 @@ config.nix
 # nix build / rebuild output symlinks
 result
 result-*
+
+# Lavish review artifacts (local HTML review surfaces, not source)
+.lavish/

@@ -275,6 +275,21 @@ installer already do this for you).
 - **Linux extras**: nixpkgs equivalents of the portable brews + optional desktop
   GUI apps (wezterm), skipped when `headless = true`.
 
+> **Two Python managers, on purpose.** `pyenv` (brew/nixpkgs, initialised in the
+> zsh `initContent`) and `uv` (shared CLI set) are both installed and both stay.
+> They resolve interpreters independently, and pyenv's shims sit early on `PATH`,
+> so a project that assumes one can silently get the other - the usual symptom is
+> a version gate reporting a 3.x nobody asked for.
+>
+> Precedence rule: **inside a project, uv wins.** A project that pins its
+> interpreter with `uv python install <version>` should export
+> `UV_MANAGED_PYTHON=1` (in its Makefile, `.envrc`, or bootstrap script), which
+> makes uv ignore pyenv shims and system pythons entirely. `uv python list` shows
+> what uv actually resolves. pyenv stays for everything outside such a project.
+>
+> No global interpreter is declared in `modules/common.nix` for the same reason:
+> a third python on `PATH` would only add another candidate to that race.
+
 ---
 
 ## Repository layout

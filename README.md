@@ -137,7 +137,7 @@ prerequisites collapse to the [Linux](#-linux) list above, run inside the distro
 GUI apps display through WSLg; alternatively use a Windows-side browser for
 `chrome-devtools-axi`.
 
-> **macOS Homebrew extras** (`herdr`, `postgresql@18`, `zulu@17`, …) are installed
+> **macOS Homebrew extras** (`herdr`, `zulu@17`, `opentofu`, …) are installed
 > declaratively in [`modules/darwin.nix`](modules/darwin.nix), so they are **not**
 > manual on macOS. Their portable equivalents come from
 > [`modules/linux.nix`](modules/linux.nix) on Linux; the remaining macOS-only apps
@@ -262,8 +262,8 @@ installer already do this for you).
 ## What you get
 
 - **Shared CLI** (all platforms): `git`, `curl`, `wget`, `jq`, `fd`, `fzf`,
-  `fastfetch`, `neovim`, `ripgrep`, `lazygit`, `tree`, `bun`, `rustup`, `zip`,
-  `unzip`, Nerd/Noto fonts.
+  `fastfetch`, `neovim`, `ripgrep`, `lazygit`, `tree`, `bun`, `rustup`, `uv`,
+  `gnumake`, `pre-commit`, `zip`, `unzip`, Nerd/Noto fonts.
 - **Shell**: `zsh` (oh-my-zsh, autosuggestion, syntax-highlighting) + `starship`,
   with the same aliases everywhere (`rebuild` re-applies the config per platform).
 - **Agent tooling** (all platforms): `gh-axi`, `chrome-devtools-axi`,

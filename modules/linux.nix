@@ -29,8 +29,6 @@
     pyenv
     zulu17
     pinentry-curses    # pinentry-mac equivalent (terminal; works headless)
-    # PostgreSQL 18 with the PostGIS extension (brew `postgresql@18` + `postgis`).
-    (postgresql_18.withPackages (ps: [ ps.postgis ]))
   ]
   # herdr from its own flake (macOS gets it via Homebrew instead). The
   # SessionStart hook in the agent configs uses it when present.

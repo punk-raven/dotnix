@@ -61,6 +61,13 @@ in
     rustup
     zip
     unzip
+    # Python/dev toolchain. `gnumake` is here because a stock Ubuntu/WSL distro
+    # ships no `make` at all, while macOS gets 3.81 from the Xcode CLT that
+    # install.sh already triggers - declaring it keeps both platforms equal.
+    # Interpreters stay out: projects pin their own via `uv python install`.
+    uv
+    gnumake
+    pre-commit
     # Fonts (rendered via fonts.fontconfig on Linux; picked up by the system
     # font path on macOS).
     nerd-fonts.hack

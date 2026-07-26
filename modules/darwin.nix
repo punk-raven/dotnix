@@ -50,8 +50,6 @@
       "mongodb-database-tools"
       "opentofu"
       "pinentry-mac"
-      "postgis"
-      "postgresql@18"
       "pyenv"
       "watchman"
     ];

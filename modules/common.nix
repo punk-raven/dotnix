@@ -223,6 +223,15 @@ in
 
       # bun completions
       [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+      # direnv - load a directory's .envrc automatically on cd. MUST be last so
+      # it wraps the final precmd/chpwd hooks. This is what makes a repo-local
+      # .envrc take effect, e.g. a GH_TOKEN that points `gh` at a specific
+      # account only inside that folder. direnv itself comes from darwin.nix /
+      # linux.nix; a directory still has to be trusted once with `direnv allow`.
+      if command -v direnv >/dev/null; then
+        eval "$(direnv hook zsh)"
+      fi
     '';
   };
 
@@ -233,6 +242,13 @@ in
   home.file = {
     ".config/wezterm".source          = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/.config/wezterm";
     ".config/nvim".source             = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/.config/nvim";
+    # NOTE: do NOT symlink ~/.config/herdr. herdr owns that directory as runtime
+    # state - it writes live sockets (herdr.sock, herdr-client.sock) and rotating
+    # logs there on every run. A whole-dir mkOutOfStoreSymlink pointed it at a
+    # nonexistent files/.config/herdr, leaving a dangling symlink; herdr's startup
+    # mkdir() then failed with EEXIST and the server never came up. To version
+    # herdr config, symlink only ".config/herdr/config.toml" (a single file),
+    # never the directory.
     "AGENTS.md".source                = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/AGENTS.md";
     ".claude/CLAUDE.md".source        = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/AGENTS.md";
     ".claude/RULES.md".source         = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/RULES.md";

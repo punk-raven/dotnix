@@ -308,6 +308,10 @@ install.sh                POSIX entry point: macOS + Linux + inside-WSL
 install.ps1               Windows: enable WSL2, install distro, hand to install.sh
 lib/prompt.sh             shared prompt/detect helpers
 tests/install_test.sh     hermetic PATH-masked stub test
+docs/
+  NIX_PACKAGES.md         full inventory of what this flake installs, per module
+  CROSS_PLATFORM_PLAN.md  the design/build plan this repo was cut from
+  blog.md                 write-up of the macOS-only predecessor
 ```
 
 ---

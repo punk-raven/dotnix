@@ -56,6 +56,24 @@
     casks = [
       "wezterm"
       "amethyst"
+      # Docker Desktop. Declared because Homebrew now owns the app - with zap,
+      # an undeclared brew-managed cask is uninstalled on the next switch.
+      #
+      # Do NOT let brew adopt an app it did not install. `brew install --cask
+      # --adopt` runs `sudo chmod -R a+rX` over the bundle, which left the
+      # signature valid on disk but the launch assessment broken: the Electron
+      # GUI died with SIGTRAP in V8 startup while the engine and containers kept
+      # running. Only `brew reinstall --cask docker-desktop` (a fresh bundle)
+      # fixed it. brew bundle adds `--adopt` by itself for an app that is present
+      # but unknown to brew (bundle/cask.rb), so the way to stay safe is to keep
+      # brew's view and the disk in agreement - never hand-install over a
+      # declared cask.
+      #
+      # Quarantine is NOT the hazard here: the reinstalled bundle still carries
+      # com.apple.quarantine and runs fine. Do not reach for
+      # `caskArgs.no_quarantine` - Homebrew 6 dropped the flag, and bundle would
+      # pass an option brew rejects, failing the switch.
+      "docker-desktop"
       "opensuperwhisper"
       "zulu@17"
     ];

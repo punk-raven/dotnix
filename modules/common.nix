@@ -68,6 +68,12 @@ in
     uv
     gnumake
     pre-commit
+    # Signed commits. `commit.gpgsign` is on per-repo, so a missing gpg does not
+    # warn - it fails the commit outright ("cannot run gpg"). It was undeclared
+    # and got zapped on the first switch to this flake; declaring it here keeps
+    # it on both platforms. The pinentry pairs with it: pinentry-mac (brew) on
+    # darwin, pinentry-curses (nixpkgs) on Linux.
+    gnupg
     # Fonts (rendered via fonts.fontconfig on Linux; picked up by the system
     # font path on macOS).
     nerd-fonts.hack

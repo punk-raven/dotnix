@@ -114,15 +114,25 @@ already sourced by the shell):
 nvm install --lts
 ```
 
-**Chromium / Brave** - `chrome-devtools-axi` and the `brave-cdp` helper attach to
-it on `:9222`:
-
-```sh
-sudo apt install chromium-browser   # or add the Brave apt repo
-```
-
 **OpenCode** (`opencode`) - optional; its config is symlinked either way. See
 https://opencode.ai.
+
+> **Brave is no longer manual on Linux/WSL.** `chrome-devtools-axi` and the
+> `brave-cdp` helper need a browser to attach to on `:9222`, so `brave` is
+> declared in [`modules/gui.nix`](modules/gui.nix) and installed on every
+> non-headless install. A headless install still has no browser by design.
+>
+> **Neither is the C toolchain.** A stock Ubuntu/WSL distro ships no compiler,
+> which breaks `rustup` (rustc uses `cc` as its linker), neovim `:TSInstall`,
+> and native npm/pre-commit hooks. macOS gets clang from the Xcode Command Line
+> Tools that `install.sh` triggers, so `gcc`, `binutils`, and `pkg-config` are
+> declared in [`modules/linux.nix`](modules/linux.nix) to match.
+>
+> **`pyenv` build headers stay manual.** `pyenv install` compiles CPython from
+> source and looks for system headers that Nix does not put where it searches.
+> Either `sudo apt install libssl-dev zlib1g-dev libbz2-dev libreadline-dev
+> libsqlite3-dev libffi-dev liblzma-dev tk-dev`, or prefer `uv python install`
+> (see the pyenv/uv precedence rule in [`docs/NIX_PACKAGES.md`](docs/NIX_PACKAGES.md)).
 
 ### 🪟 Windows (WSL2)
 
@@ -136,6 +146,44 @@ https://opencode.ai.
 prerequisites collapse to the [Linux](#-linux) list above, run inside the distro.
 GUI apps display through WSLg; alternatively use a Windows-side browser for
 `chrome-devtools-axi`.
+
+**Docker** - the one thing this flake cannot fully declare on WSL2. Standalone
+home-manager runs unprivileged and `dockerd` needs root plus an init system, and
+nixpkgs has no `docker-desktop` package for Linux at all. So
+[`modules/linux.nix`](modules/linux.nix) declares only the clients
+(`docker-client`, `docker-compose`, `docker-buildx`) and the daemon comes from
+outside Nix. Two options:
+
+1. **Docker Desktop for Windows + WSL integration** (recommended; no distro
+   changes). Settings → Resources → WSL integration → enable this distro. It
+   exposes `/var/run/docker.sock` inside WSL and the declared clients then behave
+   exactly as they do on macOS.
+2. **Docker Desktop for Linux inside the distro** (Ubuntu 24.04/26.04 LTS only,
+   and not a configuration Docker documents as supported). It requires Windows 11
+   for nested virtualization, plus systemd, which WSL2 leaves off by default:
+   ```ini
+   # %UserProfile%\.wslconfig   (Windows side)
+   [wsl2]
+   nestedVirtualization=true
+   ```
+   ```ini
+   # /etc/wsl.conf              (inside the distro)
+   [boot]
+   systemd=true
+   ```
+   Then `wsl --shutdown` from Windows, reopen the distro, and verify KVM actually
+   arrived **before** installing anything - if `/dev/kvm` is missing, the steps
+   above did not take effect and the install will not yield a working daemon:
+   ```sh
+   ls -l /dev/kvm && sudo usermod -aG kvm "$USER"
+   ```
+   Then follow https://docs.docker.com/desktop/setup/install/linux/ubuntu/ and
+   start it with `systemctl --user start docker-desktop`.
+
+> Either way the Nix profile precedes `/usr/bin` on `PATH`, so the declared
+> `docker` client wins over any CLI a `.deb` drops in. It honors
+> `~/.docker/config.json` and contexts, so it follows Docker Desktop's
+> `desktop-linux` context correctly; only `docker --version` differs.
 
 > **macOS Homebrew extras** (`herdr`, `zulu@17`, `opentofu`, …) are installed
 > declaratively in [`modules/darwin.nix`](modules/darwin.nix), so they are **not**

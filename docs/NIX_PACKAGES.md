@@ -51,7 +51,7 @@ own binaries from the same pinned versions.
 `opentofu`, `pinentry-mac`, `pyenv`, `watchman`
 
 **Casks:**
-`wezterm`, `amethyst`, `opensuperwhisper`, `zulu@17`
+`wezterm`, `amethyst`, `docker-desktop`, `opensuperwhisper`, `zulu@17`
 
 ## Linux / WSL equivalents (`modules/linux.nix`)
 
@@ -60,9 +60,22 @@ nixpkgs versions of the portable brews above:
 `bear`, `cf-terraforming`, `git-filter-repo`, `mongodb-tools`, `pyenv`,
 `zulu17`, `pinentry-curses`, plus `herdr` from its own flake.
 
+**Linux-only additions** - these have no brew counterpart because macOS gets the
+same capability from the OS:
+
+| Package | Closes |
+|---------|--------|
+| `gcc`, `binutils`, `pkg-config` | No compiler on a stock Ubuntu/WSL distro. macOS gets clang + ld from the Xcode CLT that `install.sh` triggers. Needed by `rustup` (rustc links via `cc`), neovim `:TSInstall`, and native npm/pre-commit hooks |
+| `docker-client`, `docker-compose`, `docker-buildx` | The client half of the `docker-desktop` cask. See the Docker note below |
+
 macOS-only tools (`cocoapods`, `pinentry-mac`) have no entry. GUI apps come from
-`modules/gui.nix` (`wezterm`, wrapped in nixGL so it finds a GL driver on a
-non-NixOS host) and are skipped entirely when `headless = true`.
+`modules/gui.nix` and are skipped entirely when `headless = true`:
+
+| Package | Closes |
+|---------|--------|
+| `wezterm` | The `wezterm` cask, wrapped in nixGL so it finds a GL driver on a non-NixOS host |
+| `brave` | `chrome-devtools-axi` and the `brave-cdp` helper in `agent-tooling/axi.nix` need a browser on `:9222`. macOS opens the app bundle, installed outside this flake |
+| `wl-clipboard`, `xclip` | `clipboard = "unnamedplus"` in the nvim config is a silent no-op on Linux without an external provider. macOS uses pbcopy/pbpaste natively. WSLg offers both Wayland and X11, so both providers ship |
 
 ## Neovim plugins (`files/.config/nvim/`)
 
@@ -88,10 +101,14 @@ config is an out-of-store symlink and plugins are fetched by neovim's built-in
 - Homebrew is `onActivation.cleanup = "zap"`: any brew/cask NOT declared in
   `modules/darwin.nix` gets removed on every switch. That includes anything
   installed by hand, so declare it or expect to lose it.
-- **No Docker here.** Docker Desktop is installed outside Homebrew, which is why
-  zap leaves it alone. Declaring the `docker-desktop` cask requires adopting the
-  existing app first (`brew install --cask --adopt docker-desktop`), after which
-  zap owns it.
+- **Docker is asymmetric on purpose.** macOS gets the whole engine from the
+  `docker-desktop` cask in `modules/darwin.nix`. Linux/WSL2 gets only the
+  clients (`docker-client`, `docker-compose`, `docker-buildx`) in
+  `modules/linux.nix`: standalone home-manager is unprivileged, and `dockerd`
+  needs root plus an init system, so no home-manager module can install or run
+  it. On WSL2 the daemon comes from Docker Desktop for Windows with WSL
+  integration turned on for the distro; on native Linux it is a root-level
+  concern (`services.docker`, or the distro package).
 - **Postgres is gone on purpose.** `postgresql@18` + `postgis` were removed
   because databases now come from a per-project compose container, which also
   ends the race for `:5432`.

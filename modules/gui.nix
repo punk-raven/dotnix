@@ -32,5 +32,22 @@ in
 {
   home.packages = [
     weztermGL
-  ];
+  ] ++ (with pkgs; [
+    # Clipboard bridge for neovim. files/.config/nvim/init.lua sets
+    # `clipboard = "unnamedplus"`, which macOS satisfies on its own via
+    # pbcopy/pbpaste. On Linux nvim needs an external provider or the setting is
+    # a silent no-op - yanks never leave the editor. WSLg exposes both a Wayland
+    # and an X11 display and syncs the selection to the Windows clipboard, so
+    # ship both providers and let nvim pick whichever the session offers.
+    wl-clipboard
+    xclip
+
+    # Browser for the mandated chrome-devtools-axi workflow. The `brave-cdp`
+    # helper in modules/agent-tooling/axi.nix scans PATH for
+    # brave/brave-browser/chromium/... and aborts when it finds none; macOS
+    # instead opens the app bundle, which is installed outside this flake. This
+    # is the only declared way to give the Linux/WSL path a browser to attach
+    # to on :9222. GUI-only, hence this module rather than linux.nix.
+    brave
+  ]);
 }

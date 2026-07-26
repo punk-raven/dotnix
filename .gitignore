@@ -14,3 +14,8 @@ result-*
 
 # Lavish review artifacts (local HTML review surfaces, not source)
 .lavish/
+
+# direnv env for this checkout - pins gh to the account that can push here.
+# Machine-local, never committed.
+.envrc
+.direnv/

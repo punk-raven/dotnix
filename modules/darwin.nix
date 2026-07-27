@@ -47,6 +47,7 @@
       "gh"
       "git-filter-repo"
       "ktlint"
+      "libb2"
       "mongodb-database-tools"
       "opentofu"
       "pinentry-mac"

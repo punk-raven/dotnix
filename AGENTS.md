@@ -44,6 +44,21 @@ DOTNIX_CONFIG=/tmp/linux-config.nix \
 only on non-darwin (see `flake.nix`), so point `DOTNIX_CONFIG` at a config.nix
 with the other `system` to eval the other surface.
 
+## Flake inputs are pinned to a release train
+
+`nixpkgs`, `nix-darwin` and `home-manager` track 26.05 release branches, not
+rolling heads. README's "Flake inputs" section is authoritative for the refs and
+the reasoning.
+
+Two traps worth knowing before you touch them:
+
+- nixpkgs' general release branch is named `nixos-<release>`; there is no
+  `nixpkgs-<release>`. `nixpkgs-<release>-darwin` exists but is macOS-only and is
+  the wrong input here, because one nixpkgs feeds all three surfaces.
+- The bootstrap `nix run` refs are duplicated in `install.sh`, `README.md` and
+  the assertions in `tests/install_test.sh`. Bump all of them with `flake.nix` or
+  the install tests fail.
+
 ## Agent-tooling version bumps
 
 The prebuilt tools (`rtk`, `ccusage`, `codegraph`) carry a per-`system` source

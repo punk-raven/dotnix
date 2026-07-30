@@ -278,9 +278,9 @@ EOF
       assert_not_contains "$invocations" "install.determinate.sh" "$name: wrong .sh domain never requested"
       assert_contains "$invocations" "sh -s -- install" "$name: installer invoked"
       assert_contains "$invocations" "git clone --branch main https://example.invalid/dotfiles.git $dotfiles" "$name: clones repo to DOTFILES_DIR"
-      assert_line_count "$invocations" "nix .*run nix-darwin/master#darwin-rebuild -- switch" 1 "$name: first-activation ran exactly once"
+      assert_line_count "$invocations" "nix .*run github:LnL7/nix-darwin/nix-darwin-26.05#darwin-rebuild -- switch" 1 "$name: first-activation ran exactly once"
       assert_contains "$invocations" "extra-experimental-features nix-command flakes" "$name: experimental features enabled"
-      assert_contains "$invocations" "run nix-darwin/master#darwin-rebuild -- switch --impure --flake" "$name: activates impurely (config.nix is out of tree)"
+      assert_contains "$invocations" "run github:LnL7/nix-darwin/nix-darwin-26.05#darwin-rebuild -- switch --impure --flake" "$name: activates impurely (config.nix is out of tree)"
       assert_contains "$invocations" "sudo env DOTNIX_CONFIG=$DOTNIX_CONFIG" "$name: passes DOTNIX_CONFIG through sudo"
       assert_not_contains "$invocations" "add -f config.nix" "$name: never git-tracks config.nix"
       assert_file_contains "$DOTNIX_CONFIG" 'system        = "aarch64-darwin";' "$name: writes config.nix to the out-of-tree path"
@@ -293,12 +293,12 @@ EOF
       assert_not_contains "$invocations" "git clone" "$name: does not re-clone"
       assert_line_count "$invocations" "sudo .*darwin-rebuild switch --impure --flake" 1 "$name: fast path ran exactly once"
       assert_contains "$invocations" "sudo env DOTNIX_CONFIG=$DOTNIX_CONFIG" "$name: passes DOTNIX_CONFIG through sudo"
-      assert_not_contains "$invocations" "run nix-darwin/master#darwin-rebuild" "$name: first-activation path not used"
+      assert_not_contains "$invocations" "run github:LnL7/nix-darwin/nix-darwin-26.05#darwin-rebuild" "$name: first-activation path not used"
       ;;
     linux-fresh)
       [ "$status" -eq 0 ] && pass "$name: completed in a single pass" || { fail "$name: exited $status: $out"; return; }
       assert_contains "$invocations" "sh -s -- install" "$name: installer invoked"
-      assert_contains "$invocations" "run github:nix-community/home-manager -- switch -b backup --impure --flake $dotfiles#" "$name: home-manager activation invoked impurely"
+      assert_contains "$invocations" "run github:nix-community/home-manager/release-26.05 -- switch -b backup --impure --flake $dotfiles#" "$name: home-manager activation invoked impurely"
       assert_not_contains "$invocations" "darwin-rebuild" "$name: never touches darwin-rebuild"
       assert_not_contains "$invocations" "add -f config.nix" "$name: never git-tracks config.nix"
       assert_file_contains "$DOTNIX_CONFIG" 'system        = "x86_64-linux";' "$name: writes config.nix to the out-of-tree path"

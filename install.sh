@@ -153,17 +153,23 @@ activate() {
       # First activation: darwin-rebuild doesn't exist yet, fetch it via nix run.
       # Resolve nix by absolute path (sudo won't inherit the sourced PATH) and
       # enable the experimental features it needs.
+      #
+      # Pinned to the same 26.05 release ref as flake.nix's nix-darwin input, so
+      # the bootstrap darwin-rebuild matches the flake it is about to activate.
       _nix=$(command -v nix || echo /nix/var/nix/profiles/default/bin/nix)
       sudo env DOTNIX_CONFIG="$DOTNIX_CONFIG" \
         "$_nix" --extra-experimental-features "nix-command flakes" \
-        run nix-darwin/master#darwin-rebuild -- switch --impure --flake "$DOTFILES_DIR#$HOSTNAME"
+        run github:LnL7/nix-darwin/nix-darwin-26.05#darwin-rebuild -- switch --impure --flake "$DOTFILES_DIR#$HOSTNAME"
     fi
   else
     # Standalone home-manager. `-b backup` renames any pre-existing plain file it
     # would replace, matching the darwin module's backupFileExtension.
+    #
+    # Pinned to the same 26.05 release ref as flake.nix's home-manager input, so
+    # the bootstrap home-manager matches the flake it is about to activate.
     _nix=$(command -v nix || echo /nix/var/nix/profiles/default/bin/nix)
     DOTNIX_CONFIG="$DOTNIX_CONFIG" "$_nix" --extra-experimental-features "nix-command flakes" \
-      run github:nix-community/home-manager -- switch -b backup --impure --flake "$DOTFILES_DIR#$USERNAME"
+      run github:nix-community/home-manager/release-26.05 -- switch -b backup --impure --flake "$DOTFILES_DIR#$USERNAME"
   fi
 }
 

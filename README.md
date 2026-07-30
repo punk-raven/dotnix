@@ -24,6 +24,7 @@ per-user values instead of hardcoding them.
 - [Install](#install)
 - [How `config.nix` is generated](#how-confignix-is-generated)
 - [What you get](#what-you-get) - [PATH precedence](#path-precedence)
+- [Flake inputs](#flake-inputs)
 - [Repository layout](#repository-layout)
 - [Applying changes](#applying-changes)
 
@@ -271,9 +272,12 @@ what the installer does on the first pass):
 
 ```sh
 DOTNIX_CONFIG=~/.config/dotnix/config.nix \
-  nix run github:nix-community/home-manager -- \
+  nix run github:nix-community/home-manager/release-26.05 -- \
   switch -b backup --impure --flake ~/dotfiles#<username>
 ```
+
+The ref is pinned to the same 26.05 release branch as the `home-manager` input
+in `flake.nix`, so the bootstrap CLI matches the flake it activates.
 
 ---
 
@@ -403,6 +407,38 @@ resolution for only the CLIs this flake pins.
 > `npm prefix -g` shows which prefix you are operating on. Do **not** remove
 > `quota-axi` - it is an npm global this flake does not declare, so it is the
 > real source for that command.
+
+---
+
+## Flake inputs
+
+The three core inputs track the **26.05 release train**, not a rolling
+development head. A `rebuild` therefore picks up backported fixes for a stable
+package set instead of whatever landed upstream that morning.
+
+| Input | Ref | Why this ref |
+| --- | --- | --- |
+| `nixpkgs` | `nixos-26.05` | The **general** 26.05 channel - serves macOS, Linux and WSL from one package set |
+| `nix-darwin` | `nix-darwin-26.05` | Matching release branch |
+| `home-manager` | `release-26.05` | Matching release branch |
+
+> [!IMPORTANT]
+> `nixpkgs` must **not** be switched to `nixpkgs-26.05-darwin`. That channel is
+> macOS-only, and this repo serves Linux and WSL from the same input. There is
+> no `nixpkgs-26.05` branch upstream - the non-darwin release branch is named
+> `nixos-*`, which is why the ref reads `nixos-26.05` rather than `nixpkgs-*`.
+
+The bootstrap `nix run` invocations in `install.sh` (first-pass `darwin-rebuild`
+on macOS, first-pass `home-manager` on Linux/WSL) are pinned to these same refs,
+so the tool that performs the very first activation matches the flake it is
+activating. `tests/install_test.sh` asserts those refs; if you bump the release
+train, update the flake, `install.sh`, this table, and those assertions together.
+
+The remaining inputs are unaffected: `herdr` stays on its own release tag, and
+`nix-homebrew` / `nixgl` follow their upstream defaults.
+
+`nix flake update` bumps within these branches. Moving to the next release means
+changing the refs, not running an update.
 
 ---
 

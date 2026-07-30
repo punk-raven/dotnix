@@ -2,13 +2,21 @@
   description = "Cross-platform Nix dotfiles (macOS + Linux + Windows/WSL2)";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    # Pinned to the 26.05 release train rather than a rolling development head,
+    # so a rebuild picks up backported fixes instead of a moving package set.
+    #
+    # `nixos-26.05` is the GENERAL 26.05 channel and is the correct one here:
+    # this repo serves macOS, Linux and WSL from one nixpkgs. Do NOT switch it
+    # to `nixpkgs-26.05-darwin` - that channel is macOS-only and would leave the
+    # Linux/WSL surface unserved. (There is no `nixpkgs-26.05` branch upstream;
+    # the non-darwin release branch is named `nixos-*`.)
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nix-darwin = {
-      url = "github:LnL7/nix-darwin";
+      url = "github:LnL7/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";

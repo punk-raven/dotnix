@@ -53,6 +53,27 @@ assert_file_contains() {
     fail "$msg -- expected $file to contain: $needle"; fi
 }
 
+# --- bootstrap refs, derived from flake.nix ------------------------------------
+# The release refs are duplicated across flake.nix, install.sh, README.md and
+# these assertions. flake.nix is the source of truth, so read them from there
+# rather than restating literals: bumping the release train without bumping
+# install.sh then fails here instead of silently bootstrapping a darwin-rebuild
+# / home-manager that disagrees with the flake it is activating. Plain text
+# parsing keeps the suite hermetic - no nix, no network.
+flake_input_url() {
+  local name="$1" line url
+  line=$(awk -v name="$name" '
+    $0 ~ "^[[:space:]]*"name"\\.url[[:space:]]*=" { print; exit }
+    $0 ~ "^[[:space:]]*"name"[[:space:]]*=[[:space:]]*\\{" { inblock = 1; next }
+    inblock && $0 ~ "url[[:space:]]*=" { print; exit }
+  ' "$REPO_ROOT/flake.nix")
+  url=${line#*\"}; url=${url%%\"*}
+  [ -n "$url" ] || { echo "FATAL: no url found for flake input '$name' in flake.nix" >&2; exit 1; }
+  printf '%s\n' "$url"
+}
+NIX_DARWIN_REF=$(flake_input_url nix-darwin)
+HOME_MANAGER_REF=$(flake_input_url home-manager)
+
 # --- sandbox write guard (refuses any write escaping the temp sandbox) ---------
 sandbox_guard_violation() {
   echo "HERMETIC VIOLATION: refusing to write outside sandbox: $1 (sandbox: ${2:-unknown})" >&2
@@ -273,42 +294,74 @@ EOF
 
   case "$name" in
     macos-fresh)
-      [ "$status" -eq 0 ] && pass "$name: completed in a single pass" || { fail "$name: exited $status: $out"; return; }
+      if [ "$status" -eq 0 ]; then
+        pass "$name: completed in a single pass"
+      else
+        fail "$name: exited $status: $out"; return
+      fi
       assert_contains "$invocations" "curl --proto =https --tlsv1.2 -sSf -L https://install.determinate.systems/nix" "$name: canonical Determinate URL requested"
       assert_not_contains "$invocations" "install.determinate.sh" "$name: wrong .sh domain never requested"
       assert_contains "$invocations" "sh -s -- install" "$name: installer invoked"
       assert_contains "$invocations" "git clone --branch main https://example.invalid/dotfiles.git $dotfiles" "$name: clones repo to DOTFILES_DIR"
-      assert_line_count "$invocations" "nix .*run nix-darwin/master#darwin-rebuild -- switch" 1 "$name: first-activation ran exactly once"
+      assert_line_count "$invocations" "nix .*run $NIX_DARWIN_REF#darwin-rebuild -- switch" 1 "$name: first-activation ran exactly once"
       assert_contains "$invocations" "extra-experimental-features nix-command flakes" "$name: experimental features enabled"
-      assert_contains "$invocations" "run nix-darwin/master#darwin-rebuild -- switch --impure --flake" "$name: activates impurely (config.nix is out of tree)"
+      assert_contains "$invocations" "run $NIX_DARWIN_REF#darwin-rebuild -- switch --impure --flake" "$name: activates impurely (config.nix is out of tree)"
       assert_contains "$invocations" "sudo env DOTNIX_CONFIG=$DOTNIX_CONFIG" "$name: passes DOTNIX_CONFIG through sudo"
       assert_not_contains "$invocations" "add -f config.nix" "$name: never git-tracks config.nix"
       assert_file_contains "$DOTNIX_CONFIG" 'system        = "aarch64-darwin";' "$name: writes config.nix to the out-of-tree path"
       assert_not_contains "$invocations" "darwin-rebuild switch --impure --flake" "$name: fast path not used"
       ;;
     macos-installed)
-      [ "$status" -eq 0 ] && pass "$name: completed in a single pass" || { fail "$name: exited $status: $out"; return; }
+      if [ "$status" -eq 0 ]; then
+        pass "$name: completed in a single pass"
+      else
+        fail "$name: exited $status: $out"; return
+      fi
       assert_not_contains "$invocations" "install.determinate" "$name: installer never runs when nix present"
       assert_contains "$invocations" "git -C $dotfiles pull --ff-only" "$name: updates existing checkout"
       assert_not_contains "$invocations" "git clone" "$name: does not re-clone"
       assert_line_count "$invocations" "sudo .*darwin-rebuild switch --impure --flake" 1 "$name: fast path ran exactly once"
       assert_contains "$invocations" "sudo env DOTNIX_CONFIG=$DOTNIX_CONFIG" "$name: passes DOTNIX_CONFIG through sudo"
-      assert_not_contains "$invocations" "run nix-darwin/master#darwin-rebuild" "$name: first-activation path not used"
+      assert_not_contains "$invocations" "run $NIX_DARWIN_REF#darwin-rebuild" "$name: first-activation path not used"
       ;;
     linux-fresh)
-      [ "$status" -eq 0 ] && pass "$name: completed in a single pass" || { fail "$name: exited $status: $out"; return; }
+      if [ "$status" -eq 0 ]; then
+        pass "$name: completed in a single pass"
+      else
+        fail "$name: exited $status: $out"; return
+      fi
       assert_contains "$invocations" "sh -s -- install" "$name: installer invoked"
-      assert_contains "$invocations" "run github:nix-community/home-manager -- switch -b backup --impure --flake $dotfiles#" "$name: home-manager activation invoked impurely"
+      assert_contains "$invocations" "run $HOME_MANAGER_REF -- switch -b backup --impure --flake $dotfiles#" "$name: home-manager activation invoked impurely"
       assert_not_contains "$invocations" "darwin-rebuild" "$name: never touches darwin-rebuild"
       assert_not_contains "$invocations" "add -f config.nix" "$name: never git-tracks config.nix"
       assert_file_contains "$DOTNIX_CONFIG" 'system        = "x86_64-linux";' "$name: writes config.nix to the out-of-tree path"
       ;;
     no-git)
-      [ "$status" -ne 0 ] && pass "$name: exits non-zero when git cannot be provisioned" || fail "$name: expected non-zero, got 0: $out"
+      if [ "$status" -ne 0 ]; then
+        pass "$name: exits non-zero when git cannot be provisioned"
+      else
+        fail "$name: expected non-zero, got 0: $out"
+      fi
       assert_contains "$invocations" "xcode-select --install" "$name: requests Command Line Tools"
       assert_not_contains "$invocations" "darwin-rebuild" "$name: never reaches activation without git"
       ;;
   esac
+}
+
+# Bootstrap-ref contract: install.sh fetches the tool that performs the very
+# first activation, and README documents that same command. Both must name the
+# refs flake.nix pins, or the first activation runs a nix-darwin/home-manager
+# that disagrees with the flake it is activating.
+test_bootstrap_refs_match_flake() {
+  local sh_body readme_body
+  sh_body=$(cat "$REPO_ROOT/install.sh")
+  readme_body=$(cat "$REPO_ROOT/README.md")
+  assert_contains "$sh_body" "run $NIX_DARWIN_REF#darwin-rebuild" \
+    "install.sh: darwin bootstrap pinned to flake.nix's nix-darwin ref ($NIX_DARWIN_REF)"
+  assert_contains "$sh_body" "run $HOME_MANAGER_REF -- switch" \
+    "install.sh: linux bootstrap pinned to flake.nix's home-manager ref ($HOME_MANAGER_REF)"
+  assert_contains "$readme_body" "nix run $HOME_MANAGER_REF -- " \
+    "README.md: documented bootstrap pinned to flake.nix's home-manager ref ($HOME_MANAGER_REF)"
 }
 
 # install.ps1 contract: it must delegate ALL package logic to install.sh and
@@ -325,6 +378,7 @@ run_scenario "macos-fresh"
 run_scenario "macos-installed"
 run_scenario "linux-fresh"
 run_scenario "no-git"
+test_bootstrap_refs_match_flake
 test_ps1_handoff
 
 echo

@@ -33,16 +33,36 @@ config's package list:
 ```bash
 # darwin (DOTNIX_CONFIG's config.nix must have an aarch64-darwin system)
 DOTNIX_CONFIG=~/.config/dotnix/config.nix \
-  nix eval --impure .#darwinConfigurations.<host>.config.home-manager.users.<user>.home.packages --apply 'x: builtins.length x'
+  nix eval --impure .#darwinConfigurations.<host>.config.home-manager.users.<user>.home.packages --apply 'x: builtins.length (builtins.map (p: p.name) x)'
 
 # linux: point DOTNIX_CONFIG at a config.nix whose system is x86_64-linux, then
 DOTNIX_CONFIG=/tmp/linux-config.nix \
-  nix eval --impure .#homeConfigurations.<user>.config.home.packages --apply 'x: builtins.length x'
+  nix eval --impure .#homeConfigurations.<user>.config.home.packages --apply 'x: builtins.length (builtins.map (p: p.name) x)'
 ```
+
+Mapping over the elements matters: `builtins.length` alone forces only the list
+spine, so a package attribute that exists on unstable but not on the release
+channel would not surface - exactly the failure a channel bump introduces.
 
 `darwinConfigurations` is only populated on a darwin `system`, `homeConfigurations`
 only on non-darwin (see `flake.nix`), so point `DOTNIX_CONFIG` at a config.nix
 with the other `system` to eval the other surface.
+
+## Flake inputs are pinned to a release train
+
+`nixpkgs`, `nix-darwin` and `home-manager` track 26.05 release branches, not
+rolling heads. README's "Flake inputs" section is authoritative for the refs and
+the reasoning.
+
+Two traps worth knowing before you touch them:
+
+- nixpkgs' general release branch is named `nixos-<release>`; there is no
+  `nixpkgs-<release>`. `nixpkgs-<release>-darwin` exists but is macOS-only and is
+  the wrong input here, because one nixpkgs feeds all three surfaces.
+- The bootstrap `nix run` refs are duplicated in `install.sh` and `README.md`.
+  `tests/install_test.sh` reads the refs out of `flake.nix` and asserts both
+  copies match, so bumping the train without bumping them fails the install
+  tests.
 
 ## Agent-tooling version bumps
 

@@ -84,7 +84,10 @@ in
     # Python/dev toolchain. `gnumake` is here because a stock Ubuntu/WSL distro
     # ships no `make` at all, while macOS gets 3.81 from the Xcode CLT that
     # install.sh already triggers - declaring it keeps both platforms equal.
-    # Interpreters stay out: projects pin their own via `uv python install`.
+    # No interpreter is declared here: projects pin their own via
+    # `uv python install`. One still reaches the profile indirectly, via
+    # agent-tooling/caveman.nix, which is why the PATH ordering below keeps the
+    # profile behind pyenv and Homebrew - see "PATH precedence" in README.md.
     uv
     gnumake
     pre-commit

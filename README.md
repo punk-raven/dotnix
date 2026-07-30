@@ -23,7 +23,7 @@ per-user values instead of hardcoding them.
 - [Prerequisites](#prerequisites) - [macOS](#-macos) · [Linux](#-linux) · [Windows](#-windows-wsl2)
 - [Install](#install)
 - [How `config.nix` is generated](#how-confignix-is-generated)
-- [What you get](#what-you-get)
+- [What you get](#what-you-get) - [PATH precedence](#path-precedence)
 - [Repository layout](#repository-layout)
 - [Applying changes](#applying-changes)
 

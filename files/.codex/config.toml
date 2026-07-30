@@ -1,6 +1,7 @@
 # Codex CLI configuration.
 # `hooks` must be enabled for the AXI SessionStart hooks in .codex/hooks.json to
-# fire (gh-axi / chrome-devtools-axi / lavish-axi ambient context). See nix/axi.nix.
+# fire (gh-axi / chrome-devtools-axi / lavish-axi / tasks-axi ambient context).
+# See nix/axi.nix.
 [features]
 hooks = true
 

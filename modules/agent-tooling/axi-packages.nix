@@ -81,6 +81,14 @@ in
     pnpmHash = "sha256-GrNDegz0sUEAS3JsOZs1pcF1nBg/e6ELJwsQOsHce3I=";
   };
 
+  tasks-axi = mkAxi {
+    pname = "tasks-axi";
+    version = "0.2.3";
+    binPath = "dist/bin/tasks-axi.js";
+    srcHash = "sha256-ziQJdRYtMsJW9xhRtrBiTjDe/5PcECXrBU9Wt9Tn7Vg=";
+    pnpmHash = "sha256-JoPzk2eaF+lXF+FlC85WIFzhfTfw28UlnWh5p59OY8o=";
+  };
+
   chrome-devtools-mcp = let version = "1.5.0"; in pkgs.buildNpmPackage {
     pname = "chrome-devtools-mcp";
     inherit version;

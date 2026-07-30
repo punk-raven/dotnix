@@ -315,7 +315,7 @@ installer already do this for you).
 - **Shell**: `zsh` (oh-my-zsh, autosuggestion, syntax-highlighting) + `starship`,
   with the same aliases everywhere (`rebuild` re-applies the config per platform).
 - **Agent tooling** (all platforms): `gh-axi`, `chrome-devtools-axi`,
-  `lavish-axi`, `rtk`, `ccusage`, `codegraph`, and caveman - each pinned and
+  `lavish-axi`, `tasks-axi`, `rtk`, `ccusage`, `codegraph`, and caveman - each pinned and
   reproducible, with the Linux/Intel release artifacts selected automatically by
   `system`.
 - **macOS extras**: Homebrew brews/casks (with `zap` cleanup) and

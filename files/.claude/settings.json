@@ -58,6 +58,16 @@
       {
         "hooks": [
           {
+            "command": "tasks-axi",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      },
+      {
+        "hooks": [
+          {
             "command": "caveman-activate",
             "timeout": 10,
             "type": "command"

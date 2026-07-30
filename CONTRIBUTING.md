@@ -22,6 +22,7 @@ enabled and a `config.nix` to evaluate against - copy
 anywhere, and point `$DOTNIX_CONFIG` at it).
 
 ```bash
+mkdir -p ~/.config/dotnix
 cp config.example.nix ~/.config/dotnix/config.nix
 $EDITOR ~/.config/dotnix/config.nix
 ```

@@ -202,7 +202,13 @@ outside Nix. Two options:
 > **single file**, never as a directory: herdr owns `~/.config/herdr` as runtime
 > state (live sockets, rotating logs), and a whole-directory symlink is what
 > broke its startup with `EEXIST`. The reasoning is inline in
-> [`modules/common.nix`](modules/common.nix). Note the `herdr` SessionStart hook
+> [`modules/common.nix`](modules/common.nix). herdr writes its own
+> `config.toml` on first run, so that path often already exists unmanaged. Both
+> surfaces rename such a file to `<name>.backup` instead of aborting the whole
+> switch: macOS via `home-manager.backupFileExtension = "backup"` in
+> [`flake.nix`](flake.nix), Linux/WSL via `-b backup` on the standalone
+> `home-manager switch` the `rebuild` alias runs. That applies to every path
+> this flake manages, not just herdr's. Note the `herdr` SessionStart hook
 > in the agent configs points at a machine-local script
 > (`~/.claude/hooks/herdr-agent-state.sh`); if that script is absent the hook
 > simply no-ops, safe to ignore unless you use herdr.
@@ -269,8 +275,13 @@ If the alias is still unavailable, run the raw Linux/WSL command directly:
 
 ```sh
 DOTNIX_CONFIG=~/.config/dotnix/config.nix \
-  home-manager switch --impure --flake ~/dotfiles#<username>
+  home-manager switch -b backup --impure --flake ~/dotfiles#<username>
 ```
+
+`-b backup` is what the `rebuild` alias passes too: any unmanaged file already
+sitting at a path this flake manages is renamed to `<name>.backup` rather than
+failing the switch. Drop it and the whole activation aborts on the first such
+file.
 
 The standalone `home-manager` CLI is installed by the config itself, so it only
 exists **after** a first successful activation. If you get
@@ -511,5 +522,5 @@ sudo env DOTNIX_CONFIG=~/.config/dotnix/config.nix \
 
 # Linux / WSL
 DOTNIX_CONFIG=~/.config/dotnix/config.nix \
-  home-manager switch --impure --flake ~/dotfiles#<username>
+  home-manager switch -b backup --impure --flake ~/dotfiles#<username>
 ```

@@ -22,7 +22,7 @@ let
     if pkgs.stdenv.isDarwin then
       "sudo env DOTNIX_CONFIG=${configPath} /run/current-system/sw/bin/darwin-rebuild switch --impure --flake ${dotfilesDir}#${cfg.hostname}"
     else
-      "DOTNIX_CONFIG=${configPath} home-manager switch --impure --flake ${dotfilesDir}#${cfg.username}";
+      "DOTNIX_CONFIG=${configPath} home-manager switch -b backup --impure --flake ${dotfilesDir}#${cfg.username}";
 
   # `home.sessionPath` entries that must NOT be hoisted above the Nix profile.
   # `~/.yarn/bin` is the yarn-v1 global-binary dir - the same class as the nvm

@@ -94,8 +94,17 @@ in
     # Signed commits. `commit.gpgsign` is on per-repo, so a missing gpg does not
     # warn - it fails the commit outright ("cannot run gpg"). It was undeclared
     # and got zapped on the first switch to this flake; declaring it here keeps
-    # it on both platforms. The pinentry pairs with it: pinentry-mac (brew) on
-    # darwin, pinentry-curses (nixpkgs) on Linux.
+    # it on both platforms.
+    #
+    # Installing a pinentry is NOT enough to pair it with gnupg, and for a long
+    # time this comment claimed otherwise. gpg-agent never reads a passphrase
+    # itself: it execs a separate pinentry binary at the absolute path given by
+    # `pinentry-program` in gpg-agent.conf. It does not search PATH. With no
+    # such config it falls back to a compiled-in `<gnupg>/bin/pinentry`, and the
+    # nixpkgs gnupg output ships no pinentry there - so signing failed with
+    # `gpg: signing failed: No pinentry` even though pinentry was installed and
+    # on PATH. That line is now generated on both surfaces: `services.gpg-agent`
+    # in modules/linux.nix, and the darwin-only gpg-agent.conf below.
     gnupg
     # Fonts (rendered via fonts.fontconfig on Linux; picked up by the system
     # font path on macOS).
@@ -321,6 +330,21 @@ in
       # bun completions
       [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+      # gpg-agent draws the passphrase prompt on the terminal named by GPG_TTY.
+      # `git commit -S` hands gpg a pipe on stdin, so gpg cannot infer the
+      # terminal from its own descriptors; without this the pinentry fails with
+      # "Inappropriate ioctl for device". It has to be per-shell, which is why
+      # it lives here and not in `home.sessionVariables` - those are evaluated
+      # once at build time, where the current tty is meaningless. `$TTY` is a
+      # zsh builtin, so this costs no fork.
+      #
+      # darwin only: on Linux/WSL `services.gpg-agent.enableZshIntegration`
+      # (modules/linux.nix) emits exactly this same `export GPG_TTY=$TTY` line,
+      # so exporting it here too would just be a duplicate.
+      export GPG_TTY=$TTY
+      ''}
+
       # direnv - load a directory's .envrc automatically on cd. MUST be last so
       # it wraps the final precmd/chpwd hooks. This is what makes a repo-local
       # .envrc take effect, e.g. a GH_TOKEN that points `gh` at a specific
@@ -367,5 +391,36 @@ in
     ".config/opencode/AGENTS.md".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/AGENTS.md";
     ".config/opencode/RULES.md".source  = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/RULES.md";
     ".config/opencode/TOOLING.md".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/TOOLING.md";
+  }
+  # Point gpg-agent at its pinentry on macOS. Linux/WSL gets the equivalent
+  # from `services.gpg-agent` in modules/linux.nix, which also supervises the
+  # agent; that module cannot be reused here because its `pinentry.package`
+  # takes a nixpkgs derivation, and macOS uses Homebrew's `pinentry-mac`
+  # (declared in modules/darwin.nix) - there is no `pkgs` attribute to hand it.
+  # So this is a literal path, chosen by CPU because Homebrew's prefix differs:
+  # /opt/homebrew on Apple Silicon, /usr/local on Intel. It is deliberately not
+  # a /nix/store path - pinentry-mac is not in the store at all.
+  #
+  # This lives in common.nix rather than modules/darwin.nix because darwin.nix
+  # is a nix-darwin SYSTEM module and has no `home.file`; common.nix is the only
+  # home-manager module on the darwin surface (see flake.nix).
+  #
+  # ONE-TIME MIGRATION, both platforms: a hand-written ~/.gnupg/gpg-agent.conf
+  # already exists on machines that were unblocked manually. home-manager
+  # refuses to clobber an unmanaged file, so the first switch fails until it is
+  # removed, and the agent caches its config at startup so it must be restarted
+  # afterwards:
+  #     rm ~/.gnupg/gpg-agent.conf && rebuild && gpgconf --kill gpg-agent
+  # See "GPG signing" in README.md.
+  // lib.optionalAttrs pkgs.stdenv.isDarwin {
+    ".gnupg/gpg-agent.conf".text = ''
+      pinentry-program ${
+        if pkgs.stdenv.hostPlatform.isAarch64
+        then "/opt/homebrew/bin/pinentry-mac"
+        else "/usr/local/bin/pinentry-mac"
+      }
+      default-cache-ttl 3600
+      max-cache-ttl 28800
+    '';
   };
 }

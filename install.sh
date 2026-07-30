@@ -135,7 +135,6 @@ generate_config() {
     "$_gitname" "$_gitemail" "$_system" "$_def_host" "$DOTFILES_HEADLESS"
 
   echo "Wrote $_cfg (outside the repo; the flake reads it via \$DOTNIX_CONFIG)"
-  SYSTEM="$_system"
   HOSTNAME="$_def_host"
   USERNAME="$_username"
 }

@@ -294,7 +294,11 @@ EOF
 
   case "$name" in
     macos-fresh)
-      [ "$status" -eq 0 ] && pass "$name: completed in a single pass" || { fail "$name: exited $status: $out"; return; }
+      if [ "$status" -eq 0 ]; then
+        pass "$name: completed in a single pass"
+      else
+        fail "$name: exited $status: $out"; return
+      fi
       assert_contains "$invocations" "curl --proto =https --tlsv1.2 -sSf -L https://install.determinate.systems/nix" "$name: canonical Determinate URL requested"
       assert_not_contains "$invocations" "install.determinate.sh" "$name: wrong .sh domain never requested"
       assert_contains "$invocations" "sh -s -- install" "$name: installer invoked"
@@ -308,7 +312,11 @@ EOF
       assert_not_contains "$invocations" "darwin-rebuild switch --impure --flake" "$name: fast path not used"
       ;;
     macos-installed)
-      [ "$status" -eq 0 ] && pass "$name: completed in a single pass" || { fail "$name: exited $status: $out"; return; }
+      if [ "$status" -eq 0 ]; then
+        pass "$name: completed in a single pass"
+      else
+        fail "$name: exited $status: $out"; return
+      fi
       assert_not_contains "$invocations" "install.determinate" "$name: installer never runs when nix present"
       assert_contains "$invocations" "git -C $dotfiles pull --ff-only" "$name: updates existing checkout"
       assert_not_contains "$invocations" "git clone" "$name: does not re-clone"
@@ -317,7 +325,11 @@ EOF
       assert_not_contains "$invocations" "run $NIX_DARWIN_REF#darwin-rebuild" "$name: first-activation path not used"
       ;;
     linux-fresh)
-      [ "$status" -eq 0 ] && pass "$name: completed in a single pass" || { fail "$name: exited $status: $out"; return; }
+      if [ "$status" -eq 0 ]; then
+        pass "$name: completed in a single pass"
+      else
+        fail "$name: exited $status: $out"; return
+      fi
       assert_contains "$invocations" "sh -s -- install" "$name: installer invoked"
       assert_contains "$invocations" "run $HOME_MANAGER_REF -- switch -b backup --impure --flake $dotfiles#" "$name: home-manager activation invoked impurely"
       assert_not_contains "$invocations" "darwin-rebuild" "$name: never touches darwin-rebuild"
@@ -325,7 +337,11 @@ EOF
       assert_file_contains "$DOTNIX_CONFIG" 'system        = "x86_64-linux";' "$name: writes config.nix to the out-of-tree path"
       ;;
     no-git)
-      [ "$status" -ne 0 ] && pass "$name: exits non-zero when git cannot be provisioned" || fail "$name: expected non-zero, got 0: $out"
+      if [ "$status" -ne 0 ]; then
+        pass "$name: exits non-zero when git cannot be provisioned"
+      else
+        fail "$name: expected non-zero, got 0: $out"
+      fi
       assert_contains "$invocations" "xcode-select --install" "$name: requests Command Line Tools"
       assert_not_contains "$invocations" "darwin-rebuild" "$name: never reaches activation without git"
       ;;

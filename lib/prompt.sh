@@ -1,4 +1,5 @@
 # Shared prompt + detect helpers, sourced by install.sh (POSIX sh).
+# shellcheck shell=sh
 # No side effects on source; every function is pure except write_config, which
 # writes the file it is given.
 

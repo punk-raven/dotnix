@@ -51,3 +51,20 @@ selector with an SRI hash for each platform. Bump the version, set the changed
 hashes to `pkgs.lib.fakeHash`, rebuild to surface the real hashes, paste back.
 Grab a hash directly with `nix store prefetch-file --json <url>`. Keep all four
 platform hashes in sync (aarch64/x86_64 × darwin/linux).
+
+## The zsh initContent block order is load-bearing
+
+pyenv, Homebrew, nvm and the Nix-profile re-assertion in `modules/common.nix`
+all *prepend* to `PATH`, so the order those blocks appear in decides which copy
+of a binary wins. The contract, and why each block sits where it does, is
+"PATH precedence" in `README.md`; the reasoning is repeated inline in
+`modules/common.nix`. Reordering or adding a block there changes tool resolution
+on every platform - verify by diffing `command -v` for the affected tools
+between the old and new generated `.zshrc`, not by reading the diff.
+
+## Maintaining this file
+
+Keep this file for knowledge useful to almost every future agent session in this project.
+Do not repeat what the codebase already shows; point to the authoritative file or command instead.
+Prefer rewriting or pruning existing entries over appending new ones.
+When updating this file, preserve this bar for all agents and keep entries concise.

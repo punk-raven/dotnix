@@ -115,8 +115,10 @@ config is an out-of-store symlink and plugins are fetched by neovim's built-in
 - **Two Python managers, on purpose.** `pyenv` and `uv` both stay. pyenv's shims
   sit early on `PATH`, so a project that pins its interpreter with
   `uv python install <version>` should export `UV_MANAGED_PYTHON=1` to make uv
-  ignore them. Inside such a project uv wins; pyenv keeps everything else. No
-  global interpreter is declared here for the same reason - a third python would
-  only add another candidate.
+  ignore them. Inside such a project uv wins; pyenv keeps everything else.
+  `modules/common.nix` declares no interpreter itself for the same reason; the
+  `python3` in the table above arrives via `caveman.nix`, and the PATH ordering
+  in `common.nix` keeps it behind pyenv and Homebrew so it never becomes the
+  system python. See "PATH precedence" in [`../README.md`](../README.md).
 - `gnumake` is 4.4.1, ahead of the 3.81 that ships with the Xcode CLT, and it
   shadows `/usr/bin/make` on `PATH`.

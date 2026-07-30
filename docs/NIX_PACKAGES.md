@@ -32,7 +32,7 @@ Installed on macOS, Linux and WSL alike.
 
 | Module | On PATH |
 |--------|---------|
-| `axi.nix` | `gh-axi`, `chrome-devtools-axi`, `lavish-axi` (+ pinned `chrome-devtools-mcp` engine as dep) |
+| `axi.nix` | `gh-axi`, `chrome-devtools-axi`, `lavish-axi`, `tasks-axi` (+ pinned `chrome-devtools-mcp` engine as dep) |
 | `rtk.nix` | `rtk` |
 | `caveman.nix` | `caveman-activate`, `caveman-mode-tracker`, `python3` |
 | `ccusage.nix` | `ccusage` |

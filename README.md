@@ -317,7 +317,8 @@ installer already do this for you).
 - **Agent tooling** (all platforms): `gh-axi`, `chrome-devtools-axi`,
   `lavish-axi`, `tasks-axi`, `rtk`, `ccusage`, `codegraph`, and caveman - each
   pinned and reproducible, with the Linux/Intel release artifacts selected
-  automatically by `system`.
+  automatically by `system`. The pinned build is also the one that *runs*: see
+  [PATH precedence](#path-precedence) for why that needs saying.
 - **macOS extras**: Homebrew brews/casks (with `zap` cleanup) and
   `system.defaults` in [`modules/darwin.nix`](modules/darwin.nix).
 - **Linux extras**: nixpkgs equivalents of the portable brews + optional desktop
@@ -335,8 +336,61 @@ installer already do this for you).
 > makes uv ignore pyenv shims and system pythons entirely. `uv python list` shows
 > what uv actually resolves. pyenv stays for everything outside such a project.
 >
-> No global interpreter is declared in `modules/common.nix` for the same reason:
-> a third python on `PATH` would only add another candidate to that race.
+> No interpreter is declared in `modules/common.nix` itself for the same reason:
+> another python on `PATH` would only add a candidate to that race. One does
+> arrive indirectly - `modules/agent-tooling/caveman.nix` declares `pkgs.python3`
+> because the caveman-compress skill ships Python scripts - and the `PATH`
+> ordering below is arranged so it never displaces pyenv or the system python.
+
+### PATH precedence
+
+The zsh `initContent` in [`modules/common.nix`](modules/common.nix) initialises
+pyenv, Homebrew and nvm, and each of those **prepends** to `PATH`. Left alone
+they land in front of the profile home-manager builds, which is where every
+Nix-declared binary lives - so an `npm i -g` copy of a CLI this flake pins would
+win. It did: `lavish-axi` resolved to an npm global while the flake pinned a
+different version.
+
+The blocks are therefore ordered so the resulting `PATH` reads:
+
+```
+pyenv shims  >  Homebrew  >  home.sessionPath  >  Nix profile  >  nvm  >  system
+```
+
+Read it as three rules:
+
+- **Nix beats nvm.** `~/.nvm/versions/node/<v>/bin` is where stray `npm i -g`
+  binaries land, so it sits *below* the Nix profile. nvm still owns Node itself -
+  no `node`/`npm`/`npx`/`corepack` is declared anywhere in this flake.
+- **pyenv and Homebrew keep Python.** They stay *above* the Nix profile. The only
+  names in both `/opt/homebrew/bin` and the Nix profile are the Python family
+  (`python3`, `pydoc3`, `idle3`, `python3-config`), and `pyenv global system`
+  resolves through `PATH` - hoisting Nix over Homebrew would silently swap the
+  system interpreter. Python belongs to pyenv/uv, per the note above. This is the
+  one place "Nix-declared wins" is deliberately not absolute; if a Nix-declared
+  CLI ever gains a same-named brew, that ordering has to be revisited.
+- **`home.sessionPath` keeps its own tools.** `~/.cargo/bin` and `~/.bun/bin`
+  stay above the Nix profile, exactly as home-manager orders them, so rustup and
+  bun keep managing their own toolchains.
+
+Nothing else overlaps, so the ordering changes resolution for **only** the CLIs
+this flake pins.
+
+> **One-time host cleanup.** The ordering fix makes the pinned build win even
+> while a same-named npm global is installed, but leaving the duplicates around
+> is still confusing (`npm ls -g` disagrees with `command -v`) and they keep
+> self-updating. After the next `rebuild`, remove them once:
+>
+> ```sh
+> npm uninstall -g lavish-axi tasks-axi
+> ```
+>
+> Run it in a normal shell on the host, per Node version that has them - nvm
+> keeps a separate global prefix for each, so `nvm use <version>` and repeat if
+> more than one is installed. Check with `npm ls -g --depth=0` before and after;
+> `npm prefix -g` shows which prefix you are operating on. Do **not** remove
+> `quota-axi` - it is an npm global this flake does not declare, so it is the
+> real source for that command.
 
 ---
 

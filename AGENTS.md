@@ -59,9 +59,10 @@ Two traps worth knowing before you touch them:
 - nixpkgs' general release branch is named `nixos-<release>`; there is no
   `nixpkgs-<release>`. `nixpkgs-<release>-darwin` exists but is macOS-only and is
   the wrong input here, because one nixpkgs feeds all three surfaces.
-- The bootstrap `nix run` refs are duplicated in `install.sh`, `README.md` and
-  the assertions in `tests/install_test.sh`. Bump all of them with `flake.nix` or
-  the install tests fail.
+- The bootstrap `nix run` refs are duplicated in `install.sh` and `README.md`.
+  `tests/install_test.sh` reads the refs out of `flake.nix` and asserts both
+  copies match, so bumping the train without bumping them fails the install
+  tests.
 
 ## Agent-tooling version bumps
 

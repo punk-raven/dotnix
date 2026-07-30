@@ -431,8 +431,11 @@ package set instead of whatever landed upstream that morning.
 The bootstrap `nix run` invocations in `install.sh` (first-pass `darwin-rebuild`
 on macOS, first-pass `home-manager` on Linux/WSL) are pinned to these same refs,
 so the tool that performs the very first activation matches the flake it is
-activating. `tests/install_test.sh` asserts those refs; if you bump the release
-train, update the flake, `install.sh`, this table, and those assertions together.
+activating. `tests/install_test.sh` reads the refs straight out of `flake.nix`
+and asserts that `install.sh` and this README's bootstrap command both match, so
+bumping the release train means editing `flake.nix`, `install.sh`, the documented
+bootstrap command and this table together - the test assertions themselves follow
+`flake.nix` on their own.
 
 `nix-homebrew` is pinned to an explicit **commit** rather than a branch: it
 publishes no release channel and no tags at all, so there is no ref to follow.

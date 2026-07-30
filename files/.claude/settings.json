@@ -100,6 +100,16 @@
     ]
   },
   "permissions": {
+    "allow": [
+      "Bash(rm /var/folders/78/h841hq3n2c5f6087ks28v2240000gn/T/no-mistakes-evidence/:*)",
+      "Bash(rm -f /var/folders/78/h841hq3n2c5f6087ks28v2240000gn/T/no-mistakes-evidence/:*)",
+      "Bash(rm -r /var/folders/78/h841hq3n2c5f6087ks28v2240000gn/T/no-mistakes-evidence/:*)",
+      "Bash(rm -rf /var/folders/78/h841hq3n2c5f6087ks28v2240000gn/T/no-mistakes-evidence/:*)",
+      "Bash(rm /tmp/no-mistakes-evidence/:*)",
+      "Bash(rm -f /tmp/no-mistakes-evidence/:*)",
+      "Bash(rm -r /tmp/no-mistakes-evidence/:*)",
+      "Bash(rm -rf /tmp/no-mistakes-evidence/:*)"
+    ],
     "ask": [
       "Bash(rm:*)",
       "Bash(rmdir:*)",

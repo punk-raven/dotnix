@@ -1,0 +1,41 @@
+# herdr - terminal workspace manager for AI coding agents.
+#
+# Linked in by modules/common.nix as a SINGLE FILE
+# (~/.config/herdr/config.toml), never as a directory: herdr owns
+# ~/.config/herdr as runtime state and writes live sockets and rotating logs
+# there. See the note above the link in modules/common.nix.
+#
+# Every value herdr does not find here falls back to its built-in default, so
+# this file only needs to carry what is deliberate. `herdr config check`
+# validates it; `herdr server reload-config` (prefix+shift+r) applies it.
+
+onboarding = false
+
+# tmux-style keymap, so muscle memory carries over from tmux and stays the same
+# on every machine this repo configures. These match herdr's own defaults - they
+# are written out explicitly so a future default change cannot silently move
+# them.
+[keys]
+# Enters prefix mode. Pressing it twice sends a literal ctrl+b through to the
+# running program.
+prefix = "ctrl+b"
+
+# Pane focus, tmux/vim directions.
+focus_pane_left  = "prefix+h"
+focus_pane_down  = "prefix+j"
+focus_pane_up    = "prefix+k"
+focus_pane_right = "prefix+l"
+
+[ui]
+# Order the agent panel by workspace/space rather than by recency, so a pane
+# keeps its position instead of reshuffling as agents become active.
+agent_panel_sort = "spaces"
+
+show_agent_labels_on_pane_borders = true
+
+[ui.toast]
+delivery = "system"
+
+[theme]
+name = "rose-pine"
+auto_switch = false

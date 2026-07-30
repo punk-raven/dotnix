@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/punk-raven/dotnix/security/advisories/new
+    about: Report privately through GitHub Private Vulnerability Reporting. Never open a public issue for a security problem.
+  - name: Contributing guide
+    url: https://github.com/punk-raven/dotnix/blob/main/CONTRIBUTING.md
+    about: How to set up, validate a change on both surfaces, and open a pull request.

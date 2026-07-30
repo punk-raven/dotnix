@@ -23,9 +23,10 @@ per-user values instead of hardcoding them.
 - [Prerequisites](#prerequisites) - [macOS](#-macos) · [Linux](#-linux) · [Windows](#-windows-wsl2)
 - [Install](#install)
 - [How `config.nix` is generated](#how-confignix-is-generated)
-- [What you get](#what-you-get) - [PATH precedence](#path-precedence)
+- [What you get](#what-you-get) - [PATH precedence](#path-precedence) · [GPG signing](#gpg-signing)
 - [Flake inputs](#flake-inputs)
 - [Repository layout](#repository-layout)
+- [License](#license) · [Contributing](#contributing)
 - [Applying changes](#applying-changes)
 
 ---
@@ -195,8 +196,20 @@ outside Nix. Two options:
 > **herdr** is managed declaratively on every platform - Homebrew on macOS
 > ([`modules/darwin.nix`](modules/darwin.nix)), and its own Nix flake on
 > Linux/WSL ([`modules/linux.nix`](modules/linux.nix), pinned in `flake.nix`), so
-> it is **not** a manual install. Note the `herdr` SessionStart hook in the agent
-> configs points at a machine-local script
+> it is **not** a manual install. Its config
+> ([`files/.config/herdr/config.toml`](files/.config/herdr/config.toml) - tmux
+> keymap, `ctrl+b` prefix, `hjkl` pane focus) is versioned here and linked as a
+> **single file**, never as a directory: herdr owns `~/.config/herdr` as runtime
+> state (live sockets, rotating logs), and a whole-directory symlink is what
+> broke its startup with `EEXIST`. The reasoning is inline in
+> [`modules/common.nix`](modules/common.nix). herdr writes its own
+> `config.toml` on first run, so that path often already exists unmanaged. Both
+> surfaces rename such a file to `<name>.backup` instead of aborting the whole
+> switch: macOS via `home-manager.backupFileExtension = "backup"` in
+> [`flake.nix`](flake.nix), Linux/WSL via `-b backup` on the standalone
+> `home-manager switch` the `rebuild` alias runs. That applies to every path
+> this flake manages, not just herdr's. Note the `herdr` SessionStart hook
+> in the agent configs points at a machine-local script
 > (`~/.claude/hooks/herdr-agent-state.sh`); if that script is absent the hook
 > simply no-ops, safe to ignore unless you use herdr.
 
@@ -262,8 +275,13 @@ If the alias is still unavailable, run the raw Linux/WSL command directly:
 
 ```sh
 DOTNIX_CONFIG=~/.config/dotnix/config.nix \
-  home-manager switch --impure --flake ~/dotfiles#<username>
+  home-manager switch -b backup --impure --flake ~/dotfiles#<username>
 ```
+
+`-b backup` is what the `rebuild` alias passes too: any unmanaged file already
+sitting at a path this flake manages is renamed to `<name>.backup` rather than
+failing the switch. Drop it and the whole activation aborts on the first such
+file.
 
 The standalone `home-manager` CLI is installed by the config itself, so it only
 exists **after** a first successful activation. If you get
@@ -410,6 +428,61 @@ resolution for only the CLIs this flake pins.
 
 ---
 
+### GPG signing
+
+`gpg-agent` never prompts for a passphrase itself - it execs a separate
+`pinentry` binary at the **absolute path** named by `pinentry-program` in
+`~/.gnupg/gpg-agent.conf`, and it does **not** search `PATH`. With no such
+config it falls back to a compiled-in `<gnupg>/bin/pinentry`, which the nixpkgs
+`gnupg` output does not ship. Installing a pinentry is therefore not enough; the
+symptom of the missing wiring is:
+
+```
+gpg: signing failed: No pinentry
+error: gpg failed to sign the data
+```
+
+Both surfaces now generate that line, by different mechanisms:
+
+| Surface | Mechanism | Pinentry |
+|---------|-----------|----------|
+| macOS | `home.file.".gnupg/gpg-agent.conf"` in [`modules/common.nix`](modules/common.nix) | Homebrew `pinentry-mac` |
+| Linux / WSL2 | `services.gpg-agent` in [`modules/linux.nix`](modules/linux.nix) | nixpkgs `pinentry-curses` |
+
+macOS cannot use the `services.gpg-agent` module for this because its
+`pinentry.package` option takes a nixpkgs derivation, and `pinentry-mac` comes
+from Homebrew. Neither generated config contains a `/nix/store` path: macOS
+points at the Homebrew prefix, Linux at `~/.nix-profile/bin`, so a rebuild or
+garbage collection cannot leave a dangling `pinentry-program`.
+
+`GPG_TTY` is exported from zsh init, not `home.sessionVariables` - the latter is
+evaluated once at build time, where the current terminal is meaningless. On
+Linux/WSL `services.gpg-agent.enableZshIntegration` emits it; macOS exports it
+from [`modules/common.nix`](modules/common.nix). Without it, `git commit -S`
+hands `gpg` a pipe on stdin, `gpg` cannot infer the terminal, and the prompt
+fails with `Inappropriate ioctl for device`.
+
+> **One-time migration.** If you already unblocked signing by hand-writing
+> `~/.gnupg/gpg-agent.conf`, home-manager will refuse to clobber that unmanaged
+> file and the **whole switch fails**. Remove it first, then restart the agent -
+> it caches its config at startup, so editing or replacing the file alone
+> changes nothing:
+>
+> ```sh
+> rm ~/.gnupg/gpg-agent.conf
+> rebuild
+> gpgconf --kill gpg-agent
+> ```
+>
+> Verify with `echo test | gpg --clearsign` in an interactive terminal; the
+> passphrase prompt should render.
+
+Note that signing stays **per-repo**: `programs.git.signing.format` is `null`
+and no signing key is declared, so a new clone still needs its own
+`user.signingkey` and `commit.gpgsign`.
+
+---
+
 ## Flake inputs
 
 The three core inputs track the **26.05 release train**, not a rolling
@@ -459,7 +532,7 @@ modules/
   linux.nix               Linux/WSL-only: nixpkgs brew equivalents, GUI opt-in
   gui.nix                 cross-platform GUI apps (wezterm)
   agent-tooling/          axi, rtk, caveman, ccusage, codegraph (system-keyed sources)
-files/                    dotfiles symlinked by home-manager (nvim, wezterm, agent cfg)
+files/                    dotfiles symlinked by home-manager (nvim, wezterm, herdr, agent cfg)
 install.sh                POSIX entry point: macOS + Linux + inside-WSL
 install.ps1               Windows: enable WSL2, install distro, hand to install.sh
 lib/prompt.sh             shared prompt/detect helpers
@@ -468,7 +541,26 @@ docs/
   NIX_PACKAGES.md         full inventory of what this flake installs, per module
   CROSS_PLATFORM_PLAN.md  the design/build plan this repo was cut from
   blog.md                 write-up of the macOS-only predecessor
+CONTRIBUTING.md           setup, how to validate a change, pull request expectations
+SECURITY.md               private vulnerability reporting, secret handling
+LICENSE                   MIT-0 (MIT No Attribution)
 ```
+
+---
+
+## License
+
+[MIT-0](LICENSE) (MIT No Attribution). Use, copy, modify, and redistribute
+freely; no attribution required, no warranty given.
+
+---
+
+## Contributing
+
+Contributions are welcome - see [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup,
+the eval commands that validate a change on both surfaces, and what a pull
+request should carry. Security problems go through
+[`SECURITY.md`](SECURITY.md), never a public issue.
 
 ---
 
@@ -485,5 +577,5 @@ sudo env DOTNIX_CONFIG=~/.config/dotnix/config.nix \
 
 # Linux / WSL
 DOTNIX_CONFIG=~/.config/dotnix/config.nix \
-  home-manager switch --impure --flake ~/dotfiles#<username>
+  home-manager switch -b backup --impure --flake ~/dotfiles#<username>
 ```

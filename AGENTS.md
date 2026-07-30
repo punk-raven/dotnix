@@ -82,6 +82,16 @@ of a binary wins. The contract, and why each block sits where it does, is
 on every platform - verify by diffing `command -v` for the affected tools
 between the old and new generated `.zshrc`, not by reading the diff.
 
+## Symlink single files into directories an app owns
+
+`home.file` in `modules/common.nix` links most dotfile dirs whole, but not a
+directory an application treats as live runtime state. `~/.config/herdr` is the
+worked example: herdr writes sockets and rotating logs there, and a whole-dir
+`mkOutOfStoreSymlink` dangled and killed its startup with `EEXIST`. Only
+`.config/herdr/config.toml` is linked, one entry per file - the constraint and
+its history are inline at that entry. Apply the same rule to any new app in the
+same position.
+
 ## Maintaining this file
 
 Keep this file for knowledge useful to almost every future agent session in this project.

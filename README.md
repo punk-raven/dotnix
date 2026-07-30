@@ -196,8 +196,14 @@ outside Nix. Two options:
 > **herdr** is managed declaratively on every platform - Homebrew on macOS
 > ([`modules/darwin.nix`](modules/darwin.nix)), and its own Nix flake on
 > Linux/WSL ([`modules/linux.nix`](modules/linux.nix), pinned in `flake.nix`), so
-> it is **not** a manual install. Note the `herdr` SessionStart hook in the agent
-> configs points at a machine-local script
+> it is **not** a manual install. Its config
+> ([`files/.config/herdr/config.toml`](files/.config/herdr/config.toml) - tmux
+> keymap, `ctrl+b` prefix, `hjkl` pane focus) is versioned here and linked as a
+> **single file**, never as a directory: herdr owns `~/.config/herdr` as runtime
+> state (live sockets, rotating logs), and a whole-directory symlink is what
+> broke its startup with `EEXIST`. The reasoning is inline in
+> [`modules/common.nix`](modules/common.nix). Note the `herdr` SessionStart hook
+> in the agent configs points at a machine-local script
 > (`~/.claude/hooks/herdr-agent-state.sh`); if that script is absent the hook
 > simply no-ops, safe to ignore unless you use herdr.
 
@@ -460,7 +466,7 @@ modules/
   linux.nix               Linux/WSL-only: nixpkgs brew equivalents, GUI opt-in
   gui.nix                 cross-platform GUI apps (wezterm)
   agent-tooling/          axi, rtk, caveman, ccusage, codegraph (system-keyed sources)
-files/                    dotfiles symlinked by home-manager (nvim, wezterm, agent cfg)
+files/                    dotfiles symlinked by home-manager (nvim, wezterm, herdr, agent cfg)
 install.sh                POSIX entry point: macOS + Linux + inside-WSL
 install.ps1               Windows: enable WSL2, install distro, hand to install.sh
 lib/prompt.sh             shared prompt/detect helpers

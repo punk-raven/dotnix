@@ -339,13 +339,21 @@ in
   home.file = {
     ".config/wezterm".source          = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/.config/wezterm";
     ".config/nvim".source             = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/.config/nvim";
-    # NOTE: do NOT symlink ~/.config/herdr. herdr owns that directory as runtime
-    # state - it writes live sockets (herdr.sock, herdr-client.sock) and rotating
-    # logs there on every run. A whole-dir mkOutOfStoreSymlink pointed it at a
-    # nonexistent files/.config/herdr, leaving a dangling symlink; herdr's startup
-    # mkdir() then failed with EEXIST and the server never came up. To version
-    # herdr config, symlink only ".config/herdr/config.toml" (a single file),
-    # never the directory.
+    # herdr: SINGLE FILE only. Do NOT symlink ~/.config/herdr itself. herdr owns
+    # that directory as runtime state - it writes live sockets (herdr.sock,
+    # herdr-client.sock) and rotating logs there on every run. A whole-dir
+    # mkOutOfStoreSymlink pointed it at a nonexistent files/.config/herdr,
+    # leaving a dangling symlink; herdr's startup mkdir() then failed with
+    # EEXIST and the server never came up. Linking config.toml on its own leaves
+    # the directory a real directory that herdr keeps owning, so that failure
+    # cannot recur. Any future herdr file must be linked the same way, one
+    # entry per file.
+    #
+    # Unguarded on purpose: herdr is present on every surface this repo
+    # configures - Homebrew on macOS (modules/darwin.nix), its own flake input
+    # on Linux and WSL2 (`herdrPkg` in modules/linux.nix) - so there is no
+    # platform where this link would dangle.
+    ".config/herdr/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/.config/herdr/config.toml";
     "AGENTS.md".source                = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/AGENTS.md";
     ".claude/CLAUDE.md".source        = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/AGENTS.md";
     ".claude/RULES.md".source         = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/RULES.md";

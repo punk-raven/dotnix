@@ -24,15 +24,25 @@ let
     else
       "DOTNIX_CONFIG=${configPath} home-manager switch --impure --flake ${dotfilesDir}#${cfg.username}";
 
+  # `home.sessionPath` entries that must NOT be hoisted above the Nix profile.
+  # `~/.yarn/bin` is the yarn-v1 global-binary dir - the same class as the nvm
+  # global dir, i.e. somewhere `yarn global add <cli>` can drop a copy of a CLI
+  # this flake pins - so it belongs BELOW the profile for exactly the reason nvm
+  # does. Excluding it here does not drop it from PATH: home-manager's own
+  # session-vars prefix already places it there, below the profile.
+  demotedSessionPathDirs = [ "$HOME/.yarn/bin" ];
+
   # The directories home-manager itself puts at the front of the session PATH,
-  # in home-manager's own order: the declared `home.sessionPath` entries, then
-  # the profile that holds every Nix-declared binary. Read from `config` rather
-  # than re-listed, so it stays correct when `home.sessionPath` changes and on
-  # both surfaces - `home.profileDirectory` is /etc/profiles/per-user/<user>
-  # under nix-darwin (`useUserPackages = true`) and ~/.nix-profile under
-  # standalone home-manager on Linux/WSL. Re-asserted in the zsh init below.
+  # in home-manager's own order: the declared `home.sessionPath` entries (minus
+  # the demoted ones above), then the profile that holds every Nix-declared
+  # binary. Read from `config` rather than re-listed, so it stays correct when
+  # `home.sessionPath` changes and on both surfaces - `home.profileDirectory` is
+  # /etc/profiles/per-user/<user> under nix-darwin (`useUserPackages = true`)
+  # and ~/.nix-profile under standalone home-manager on Linux/WSL. Re-asserted
+  # in the zsh init below.
   managedPathDirs = lib.concatStringsSep " " (map (p: "\"${p}\"")
-    (config.home.sessionPath ++ [ "${config.home.profileDirectory}/bin" ]));
+    (lib.subtractLists demotedSessionPathDirs config.home.sessionPath
+      ++ [ "${config.home.profileDirectory}/bin" ]));
 in
 {
   imports = [
@@ -222,7 +232,8 @@ in
       # PATH assembly. These four blocks each PREPEND, so the LAST one to run
       # ends up FIRST on PATH. The resulting order is deliberate:
       #
-      #   pyenv shims > Homebrew > home.sessionPath > Nix profile > nvm > system
+      #   pyenv shims > Homebrew > ~/.local/bin > ~/.cargo/bin > ~/.bun/bin
+      #     > Nix profile > nvm > ~/.yarn/bin > system
       #
       # Rationale per block is inline below; the short version is that the Nix
       # profile has to outrank nvm (that is where stray `npm i -g` binaries
@@ -253,10 +264,20 @@ in
       #
       # Re-prepending the same dirs, in home-manager's own order, restores the
       # intent: a binary this repo declares beats a stray global install of the
-      # same name. `home.sessionPath` is re-prepended alongside the profile and
-      # ahead of it, exactly as home-manager orders them, so `~/.cargo/bin` and
-      # `~/.bun/bin` keep winning for `cargo`/`rustc`/`bun` - rustup and bun
-      # manage their own toolchains out of those dirs.
+      # same name. Three `home.sessionPath` dirs are re-prepended ahead of the
+      # profile, exactly as home-manager orders them, and each is a deliberate
+      # exception to "Nix-declared wins":
+      #   - `~/.local/bin` holds self-updating agent runtimes that are NOT
+      #     Nix-declared and must win (claude, codex, cursor-agent,
+      #     no-mistakes, treehouse). Demoting it would invert the risk - a
+      #     stale or absent Nix entry could shadow the live runtime, which is
+      #     worse than the latent shadowing demotion would prevent.
+      #   - `~/.cargo/bin` and `~/.bun/bin`: rustup and bun manage their own
+      #     toolchains out of those dirs, so they keep owning
+      #     `cargo`/`rustc`/`rustup` and `bun`/`bunx`.
+      # `~/.yarn/bin` is NOT an exception - it is a global-install dir like
+      # nvm's, so `demotedSessionPathDirs` above keeps it out of this array and
+      # it stays below the profile where home-manager already put it.
       #
       # `''${path:|arr}` drops the stale copies instead of duplicating them, so
       # this reorders rather than grows PATH and is idempotent if the rc file

@@ -354,27 +354,39 @@ different version.
 The blocks are therefore ordered so the resulting `PATH` reads:
 
 ```
-pyenv shims  >  Homebrew  >  home.sessionPath  >  Nix profile  >  nvm  >  system
+pyenv shims  >  Homebrew  >  ~/.local/bin  >  ~/.cargo/bin  >  ~/.bun/bin
+  >  Nix profile  >  nvm  >  ~/.yarn/bin  >  system
 ```
 
 Read it as three rules:
 
-- **Nix beats nvm.** `~/.nvm/versions/node/<v>/bin` is where stray `npm i -g`
-  binaries land, so it sits *below* the Nix profile. nvm still owns Node itself -
-  no `node`/`npm`/`npx`/`corepack` is declared anywhere in this flake.
+- **Nix beats the global-install dirs.** `~/.nvm/versions/node/<v>/bin` is where
+  stray `npm i -g` binaries land, and `~/.yarn/bin` is the yarn-v1 equivalent, so
+  both sit *below* the Nix profile even though `~/.yarn/bin` is a
+  `home.sessionPath` entry. nvm still owns Node itself - no
+  `node`/`npm`/`npx`/`corepack` is declared anywhere in this flake.
 - **pyenv and Homebrew keep Python.** They stay *above* the Nix profile. The only
   names in both `/opt/homebrew/bin` and the Nix profile are the Python family
   (`python3`, `pydoc3`, `idle3`, `python3-config`), and `pyenv global system`
   resolves through `PATH` - hoisting Nix over Homebrew would silently swap the
-  system interpreter. Python belongs to pyenv/uv, per the note above. This is the
-  one place "Nix-declared wins" is deliberately not absolute; if a Nix-declared
-  CLI ever gains a same-named brew, that ordering has to be revisited.
-- **`home.sessionPath` keeps its own tools.** `~/.cargo/bin` and `~/.bun/bin`
-  stay above the Nix profile, exactly as home-manager orders them, so rustup and
-  bun keep managing their own toolchains.
+  system interpreter. Python belongs to pyenv/uv, per the note above. This is one
+  of two bounded places "Nix-declared wins" is deliberately not absolute; if a
+  Nix-declared CLI ever gains a same-named brew, that ordering has to be
+  revisited.
+- **Three `home.sessionPath` dirs keep their own tools.** `~/.local/bin`,
+  `~/.cargo/bin` and `~/.bun/bin` stay above the Nix profile, exactly as
+  home-manager orders them. `~/.local/bin` holds self-updating agent runtimes
+  that are *not* Nix-declared and must win (`claude`, `codex`, `cursor-agent`,
+  `no-mistakes`, `treehouse`) - demoting it would let a stale or missing Nix
+  entry shadow the live runtime, which is worse than the latent shadowing it
+  would prevent. `~/.cargo/bin` and `~/.bun/bin` keep rustup and bun managing
+  their own toolchains, and since `rustup` and `bun` *are* declared in the shared
+  CLI set, that is the second bounded exception to "Nix-declared wins" alongside
+  Python. `~/.yarn/bin` is excluded from this hoist for the reason in the first
+  rule.
 
-Nothing else overlaps, so the ordering changes resolution for **only** the CLIs
-this flake pins.
+Nothing beyond the overlaps listed above collides, so the ordering changes
+resolution for only the CLIs this flake pins.
 
 > **One-time host cleanup.** The ordering fix makes the pinned build win even
 > while a same-named npm global is installed, but leaving the duplicates around

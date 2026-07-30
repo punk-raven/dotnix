@@ -434,8 +434,11 @@ so the tool that performs the very first activation matches the flake it is
 activating. `tests/install_test.sh` asserts those refs; if you bump the release
 train, update the flake, `install.sh`, this table, and those assertions together.
 
-The remaining inputs are unaffected: `herdr` stays on its own release tag, and
-`nix-homebrew` / `nixgl` follow their upstream defaults.
+`nix-homebrew` is pinned to an explicit **commit** rather than a branch: it
+publishes no release channel and no tags at all, so there is no ref to follow.
+Bumping it is therefore a deliberate, manual edit of the rev in `flake.nix` -
+`nix flake update` cannot move it. `herdr` stays on its own release tag and
+`nixgl` follows its upstream default; both are unaffected.
 
 `nix flake update` bumps within these branches. Moving to the next release means
 changing the refs, not running an update.

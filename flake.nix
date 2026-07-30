@@ -19,7 +19,12 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    # nix-homebrew publishes no release channel and no tags at all - only `main`
+    # plus feature branches - so there is no branch to follow onto the 26.05
+    # train. It is pinned to an explicit commit instead, which means bumping it
+    # is a MANUAL edit of this rev; `nix flake update` cannot move it the way it
+    # moves nixpkgs/nix-darwin/home-manager within their release branches.
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew/de7953a08ed4bb9245be043e468561c17b89130d";
     # herdr - terminal workspace manager for AI coding agents. Cross-platform
     # flake; wired into the Linux/WSL package set (macOS gets it via Homebrew in
     # modules/darwin.nix). Pinned to a release tag; `nix flake update herdr` bumps.

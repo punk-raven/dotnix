@@ -113,6 +113,7 @@
       "original": {
         "owner": "zhaofengli",
         "repo": "nix-homebrew",
+        "rev": "de7953a08ed4bb9245be043e468561c17b89130d",
         "type": "github"
       }
     },

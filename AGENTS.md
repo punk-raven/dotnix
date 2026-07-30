@@ -33,12 +33,16 @@ config's package list:
 ```bash
 # darwin (DOTNIX_CONFIG's config.nix must have an aarch64-darwin system)
 DOTNIX_CONFIG=~/.config/dotnix/config.nix \
-  nix eval --impure .#darwinConfigurations.<host>.config.home-manager.users.<user>.home.packages --apply 'x: builtins.length x'
+  nix eval --impure .#darwinConfigurations.<host>.config.home-manager.users.<user>.home.packages --apply 'x: builtins.length (builtins.map (p: p.name) x)'
 
 # linux: point DOTNIX_CONFIG at a config.nix whose system is x86_64-linux, then
 DOTNIX_CONFIG=/tmp/linux-config.nix \
-  nix eval --impure .#homeConfigurations.<user>.config.home.packages --apply 'x: builtins.length x'
+  nix eval --impure .#homeConfigurations.<user>.config.home.packages --apply 'x: builtins.length (builtins.map (p: p.name) x)'
 ```
+
+Mapping over the elements matters: `builtins.length` alone forces only the list
+spine, so a package attribute that exists on unstable but not on the release
+channel would not surface - exactly the failure a channel bump introduces.
 
 `darwinConfigurations` is only populated on a darwin `system`, `homeConfigurations`
 only on non-darwin (see `flake.nix`), so point `DOTNIX_CONFIG` at a config.nix

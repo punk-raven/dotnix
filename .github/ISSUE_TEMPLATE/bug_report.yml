@@ -1,0 +1,82 @@
+name: Bug report
+description: Something in the flake, a module, or the installer does not behave as documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please do **not** paste the contents of your
+        `config.nix` - it holds your name, email, and paths. Redact anything
+        personal in logs too.
+
+        For security problems, use
+        [Private Vulnerability Reporting](https://github.com/punk-raven/dotnix/security/advisories/new)
+        instead of this form.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The exact commands you ran, in order.
+      placeholder: |
+        1. ...
+        2. ...
+      render: shell
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      description: Which of the three surfaces is affected? Windows runs the Linux path under WSL2.
+      options:
+        - macOS (nix-darwin)
+        - Linux (standalone home-manager)
+        - Windows / WSL2 (Linux path)
+        - More than one
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: arch
+    attributes:
+      label: System
+      description: The `system` value from your `config.nix`.
+      placeholder: aarch64-darwin
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: Commit
+      description: Output of `git rev-parse --short HEAD` in your checkout.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output
+      description: The relevant error output. Trim it to the decisive part.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I redacted personal values (name, email, paths, tokens) from everything pasted above.
+          required: true
+        - label: I read `AGENTS.md` and the relevant `README.md` section.
+          required: false

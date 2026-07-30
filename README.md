@@ -26,6 +26,7 @@ per-user values instead of hardcoding them.
 - [What you get](#what-you-get) - [PATH precedence](#path-precedence)
 - [Flake inputs](#flake-inputs)
 - [Repository layout](#repository-layout)
+- [License](#license) · [Contributing](#contributing)
 - [Applying changes](#applying-changes)
 
 ---
@@ -468,7 +469,26 @@ docs/
   NIX_PACKAGES.md         full inventory of what this flake installs, per module
   CROSS_PLATFORM_PLAN.md  the design/build plan this repo was cut from
   blog.md                 write-up of the macOS-only predecessor
+CONTRIBUTING.md           setup, how to validate a change, pull request expectations
+SECURITY.md               private vulnerability reporting, secret handling
+LICENSE                   MIT-0 (MIT No Attribution)
 ```
+
+---
+
+## License
+
+[MIT-0](LICENSE) (MIT No Attribution). Use, copy, modify, and redistribute
+freely; no attribution required, no warranty given.
+
+---
+
+## Contributing
+
+Contributions are welcome - see [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup,
+the eval commands that validate a change on both surfaces, and what a pull
+request should carry. Security problems go through
+[`SECURITY.md`](SECURITY.md), never a public issue.
 
 ---
 

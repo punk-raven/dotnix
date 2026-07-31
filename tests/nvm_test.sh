@@ -16,6 +16,7 @@
 #   pin-bump           nvm pin changed -> scripts re-synced, Node untouched
 #   node-pin-bump      Node pin changed -> new Node installed AND default moved
 #   node-pin-bump-user same bump, but the user owns the default -> left alone
+#   node-pin-bump-alias-failure a failed alias move is not stamped, and retries
 #   self-heal          stamp intact, files gone -> re-synced anyway
 #   install-failure    `nvm install` fails -> exit 0, warning, no default alias
 #   retry-after-failure a failed run leaves nothing that skips the next attempt
@@ -77,8 +78,9 @@ mtime() { stat -f %m "$1" 2>/dev/null || stat -c %Y "$1"; }
 # The stub `nvm` is a shell FUNCTION defined by the stub nvm.sh, exactly as
 # upstream defines it - `nvm` is not an executable, so a PATH stub would never
 # be reached by the bootstrap's `. nvm.sh && nvm ...`. Its install arm fails
-# whenever $SANDBOX/fail-install exists, so a scenario can flip the network
-# between runs without rebuilding the sandbox.
+# whenever $SANDBOX/fail-install exists, and its alias arm whenever
+# $SANDBOX/fail-alias does, so a scenario can flip either failure between runs
+# without rebuilding the sandbox.
 #
 # $HOME is exported per scenario, so it is restored on teardown: anything run
 # BETWEEN scenarios (the real-nvm scenario's `nix store prefetch-file`, say)
@@ -93,6 +95,7 @@ make_sandbox() {
   export NVM_DIR="$HOME/.nvm"
   export STUB_LOG="$SANDBOX/log"
   export STUB_FAIL="$SANDBOX/fail-install"
+  export STUB_FAIL_ALIAS="$SANDBOX/fail-alias"
   mkdir -p "$HOME" "$SANDBOX/store"
   : > "$STUB_LOG"
 
@@ -115,6 +118,7 @@ nvm() {
       fi
       ;;
     alias)
+      [ -e "$STUB_FAIL_ALIAS" ] && return 1
       mkdir -p "$NVM_DIR/alias"
       printf '%s\n' "$3" > "$NVM_DIR/alias/$2"
       ;;
@@ -142,6 +146,7 @@ run_bootstrap() {
         NVM_DIR="$NVM_DIR" \
         STUB_LOG="$STUB_LOG" \
         STUB_FAIL="$STUB_FAIL" \
+        STUB_FAIL_ALIAS="$STUB_FAIL_ALIAS" \
         HOME="$HOME" \
         bash "$BOOTSTRAP" 2>&1)
   RUN_STATUS=$?
@@ -239,6 +244,28 @@ scenario_node_pin_bump_user() {
   assert_executable "$NVM_DIR/versions/node/$BUMPED_NODE/bin/node" "node-pin-bump-user: the newly pinned Node is still installed"
   assert_eq "$(cat "$NVM_DIR/alias/default")" "v20.11.1" "node-pin-bump-user: a user-chosen default survives a pin bump"
   assert_eq "$(count_log alias)" "0" "node-pin-bump-user: never re-aliases over the user's choice"
+  cleanup_sandbox
+}
+
+scenario_node_pin_bump_alias_failure() {
+  make_sandbox node-pin-bump-alias-failure
+  run_bootstrap >/dev/null
+  # The pin moves, the Node installs, but writing the alias fails. Stamping the
+  # new pin here would make the next run read the stale alias as user-chosen and
+  # strand the machine on the old Node forever.
+  : > "$STUB_FAIL_ALIAS"
+  local out; out=$(run_bootstrap "$PINNED_NVM" "$BUMPED_NODE")
+  assert_eq "$RUN_STATUS" "0" "node-pin-bump-alias-failure: exits 0"
+  assert_contains "$out" "could not set nvm's default alias to $BUMPED_NODE" "node-pin-bump-alias-failure: explains what failed"
+  assert_eq "$(cat "$NVM_DIR/alias/default")" "$PINNED_NODE" "node-pin-bump-alias-failure: default still on the old pin"
+  assert_eq "$(cat "$NVM_DIR/.dotnix-node-version")" "$PINNED_NODE" "node-pin-bump-alias-failure: a failed move is not stamped as done"
+
+  rm -f "$STUB_FAIL_ALIAS"   # whatever broke the alias write is fixed
+  run_bootstrap "$PINNED_NVM" "$BUMPED_NODE" >/dev/null
+  assert_eq "$RUN_STATUS" "0" "node-pin-bump-alias-failure: retry exits 0"
+  assert_eq "$(count_log install)" "2" "node-pin-bump-alias-failure: the retry re-uses the already-installed Node"
+  assert_eq "$(cat "$NVM_DIR/alias/default")" "$BUMPED_NODE" "node-pin-bump-alias-failure: the next activation still moves the default"
+  assert_eq "$(cat "$NVM_DIR/.dotnix-node-version")" "$BUMPED_NODE" "node-pin-bump-alias-failure: stamp follows once the move lands"
   cleanup_sandbox
 }
 
@@ -370,6 +397,7 @@ scenario_node_present
 scenario_pin_bump
 scenario_node_pin_bump
 scenario_node_pin_bump_user
+scenario_node_pin_bump_alias_failure
 scenario_self_heal
 scenario_install_failure
 scenario_retry_after_failure

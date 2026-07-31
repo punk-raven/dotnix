@@ -108,19 +108,32 @@ fi
 # user's own version choice.
 if [ -x "$node_bin" ]; then
   current_default=$(cat "$NVM_DIR/alias/default" 2>/dev/null)
+  # Only a completed move may be stamped - see the stamp comment below.
+  alias_ok=1
   if [ -z "$current_default" ] \
     || { [ -n "$prev_node" ] && [ "$current_default" = "$prev_node" ]; }; then
     if [ "$current_default" != "$DOTNIX_NODE_VERSION" ] \
       && ! run_nvm alias default "$DOTNIX_NODE_VERSION" >/dev/null; then
       warn "could not set nvm's default alias to $DOTNIX_NODE_VERSION"
+      alias_ok=0
     fi
   fi
 
-  # Stamped last, and only when it moved, for the same reason as the nvm stamp:
-  # a failed install exits above without stamping, so the next activation
-  # retries instead of treating the pin as satisfied - and a satisfied
-  # re-activation still performs zero writes.
-  if [ "$prev_node" != "$DOTNIX_NODE_VERSION" ]; then
+  # Stamped last, after the alias move and only if that move actually landed,
+  # for the same reason as the nvm stamp: a stamp is a claim that the pin is
+  # satisfied, and a failed install exits above without making one.
+  #
+  # Stamping a FAILED alias move would be worse than not stamping at all: the
+  # stamp is the only thing that distinguishes "still the alias we wrote" from
+  # "the user picked this", so recording the new pin while the alias is still on
+  # the old one would reclassify that alias as user-owned on the next run and
+  # freeze the machine on the old Node forever, silently. Leaving the stamp put
+  # makes the next activation retry the move instead.
+  #
+  # An alias deliberately left alone because the user owns it still stamps: that
+  # path writes nothing and cannot fail, and the pin move is complete as far as
+  # this script is ever going to take it.
+  if [ "$alias_ok" = 1 ] && [ "$prev_node" != "$DOTNIX_NODE_VERSION" ]; then
     printf '%s\n' "$DOTNIX_NODE_VERSION" > "$node_stamp"
   fi
 fi

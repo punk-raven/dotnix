@@ -34,6 +34,10 @@ see the nvm note at the bottom of this file.
 | `nvm` (`nvm.sh`, `nvm-exec`, `bash_completion`) | `nvmVersion` | `~/.nvm/` (copied from the store on activation) |
 | default LTS Node (`node`, `npm`, `npx`, `corepack`) | `nodeVersion` | `~/.nvm/versions/node/<v>/bin` (fetched by `nvm install`) |
 
+Bumping `nodeVersion` installs the new Node and moves `nvm alias default` to it,
+but only while that alias is still the one the previous activation wrote - a
+default you set yourself is never overwritten.
+
 ## nix-darwin `environment.systemPackages` (`modules/darwin.nix`)
 
 `starship`

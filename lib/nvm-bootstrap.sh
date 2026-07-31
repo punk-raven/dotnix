@@ -40,7 +40,15 @@ warn() { echo "nvm-bootstrap: $*" >&2; }
 # over and pins it; that is the point.
 stamp="$NVM_DIR/.dotnix-nvm-version"
 
-if [ "$(cat "$stamp" 2>/dev/null)" != "$DOTNIX_NVM_VERSION" ]; then
+# The stamp alone is not enough to prove $NVM_DIR is intact: a later upstream
+# `curl | bash` nvm install, or a stray `rm`, can leave the stamp matching while
+# the files it vouches for are gone or truncated. Re-syncing whenever any of the
+# three is missing or empty is what keeps this module actually owning the pinned
+# nvm it claims to own, instead of warning on every activation forever.
+if [ "$(cat "$stamp" 2>/dev/null)" != "$DOTNIX_NVM_VERSION" ] \
+  || [ ! -s "$NVM_DIR/nvm.sh" ] \
+  || [ ! -s "$NVM_DIR/nvm-exec" ] \
+  || [ ! -s "$NVM_DIR/bash_completion" ]; then
   # Only nvm's runtime files are copied, not the whole upstream tree: nvm.sh is
   # the library the shell sources, nvm-exec is the only sibling nvm.sh execs
   # (`nvm exec`), and bash_completion is what the rc file sources for
@@ -62,6 +70,14 @@ fi
 
 node_bin="$NVM_DIR/versions/node/$DOTNIX_NODE_VERSION/bin/node"
 
+# The Node counterpart of the nvm stamp: it records which Node THIS flake last
+# pinned, which is the only way to tell "the default alias is still the one we
+# wrote" from "the user has since chosen their own". Without it a `nodeVersion`
+# bump would download the new Node and leave every shell on the old one, because
+# real nvm only auto-sets `default` when no alias exists at all.
+node_stamp="$NVM_DIR/.dotnix-node-version"
+prev_node=$(cat "$node_stamp" 2>/dev/null)
+
 # `--no-use` keeps sourcing nvm.sh from resolving and activating a version,
 # which is both wasted work here and the one path that would touch the network
 # on an otherwise-satisfied activation.
@@ -78,14 +94,34 @@ if [ ! -x "$node_bin" ]; then
   fi
 fi
 
-# First activation only. `nvm install` sets the default itself when no alias
-# exists, so this is mostly belt-and-braces - but it also covers a $NVM_DIR that
-# already had the pinned Node and no default. Once the alias exists it is left
-# alone forever, so a later `nvm alias default <other>` sticks and this never
-# fights the user's own version choice.
-if [ ! -s "$NVM_DIR/alias/default" ] && [ -x "$node_bin" ]; then
-  if ! run_nvm alias default "$DOTNIX_NODE_VERSION" >/dev/null; then
-    warn "could not set nvm's default alias to $DOTNIX_NODE_VERSION"
+# Two cases, and only two, move the default alias:
+#
+#   1. There is no default at all. `nvm install` sets one itself when the alias
+#      is absent, so this is mostly belt-and-braces - but it also covers a
+#      $NVM_DIR that already had the pinned Node and no default.
+#   2. The default is still exactly the Node this flake stamped last time, i.e.
+#      nobody has touched it since we wrote it, so following a `nodeVersion`
+#      bump is what the user asked for by bumping the pin.
+#
+# Anything else means the user picked that version themselves (`nvm alias
+# default <other>`), and it is left alone forever - the flake never fights the
+# user's own version choice.
+if [ -x "$node_bin" ]; then
+  current_default=$(cat "$NVM_DIR/alias/default" 2>/dev/null)
+  if [ -z "$current_default" ] \
+    || { [ -n "$prev_node" ] && [ "$current_default" = "$prev_node" ]; }; then
+    if [ "$current_default" != "$DOTNIX_NODE_VERSION" ] \
+      && ! run_nvm alias default "$DOTNIX_NODE_VERSION" >/dev/null; then
+      warn "could not set nvm's default alias to $DOTNIX_NODE_VERSION"
+    fi
+  fi
+
+  # Stamped last, and only when it moved, for the same reason as the nvm stamp:
+  # a failed install exits above without stamping, so the next activation
+  # retries instead of treating the pin as satisfied - and a satisfied
+  # re-activation still performs zero writes.
+  if [ "$prev_node" != "$DOTNIX_NODE_VERSION" ]; then
+    printf '%s\n' "$DOTNIX_NODE_VERSION" > "$node_stamp"
   fi
 fi
 

@@ -77,9 +77,11 @@ brew install --cask brave-browser
 **OpenCode** (`opencode`) - optional; its config is symlinked either way. See
 https://opencode.ai.
 
-> **`nvm` and Node are not manual.** The `npm i -g` above works on a fresh Mac
-> because the first activation installs `nvm` and a default LTS Node for you -
-> see [Node and `nvm`](#node-and-nvm).
+> **`nvm` and Node are not manual.** The first activation installs `nvm` and a
+> default LTS Node for you, so the `npm i -g` above works on a fresh Mac - but
+> from a **new** terminal: `nvm` is sourced by the generated `.zshrc`, so the
+> shell that ran `install.sh` has no `npm` yet. See
+> [Node and `nvm`](#node-and-nvm).
 
 ### 🐧 Linux
 
@@ -110,7 +112,9 @@ npm i -g @openai/codex
 https://opencode.ai.
 
 > **`nvm` and Node are no longer manual either.** They arrive with the first
-> activation on every surface - see [Node and `nvm`](#node-and-nvm).
+> activation on every surface, and are on `PATH` in a **new** terminal - `nvm`
+> is sourced by the generated `.zshrc`, so the shell that ran `install.sh` has
+> no `npm` yet. See [Node and `nvm`](#node-and-nvm).
 >
 > **Brave is no longer manual on Linux/WSL.** `chrome-devtools-axi` and the
 > `brave-cdp` helper need a browser to attach to on `:9222`, so `brave` is
@@ -377,9 +381,11 @@ Two consequences worth knowing:
   re-downloaded once the pinned version is present. A failed download warns and
   leaves `nvm` working - it never fails the whole activation, and the next
   `rebuild` retries.
-- **`nvm` keeps owning Node.** The default alias is written only when you have
-  none, so `nvm install <v>`, `nvm use <v>` and `nvm alias default <v>` all
-  behave normally afterwards and the flake never overwrites your choice. No
+- **`nvm` keeps owning Node.** The default alias is written when you have none,
+  and moved when a `nodeVersion` bump arrives *and* the current default is still
+  exactly the one the last activation wrote. The moment you set your own
+  (`nvm alias default <v>`), it is yours: activation never touches it again, and
+  `nvm install <v>` / `nvm use <v>` behave normally. No
   `node`/`npm`/`npx`/`corepack` is declared anywhere in this flake.
 
 Why an activation step instead of a package: nixpkgs ships no `nvm` (it is a
@@ -391,8 +397,11 @@ shell library, not a program), Homebrew's formula would serve macOS only, and
 `bash tests/nvm_test.sh`.
 
 To move either pin, edit `nvmVersion` / `nodeVersion` in
-[`modules/nvm.nix`](modules/nvm.nix) and `rebuild`. `--lts` is deliberately not
-used, so a rebuild never silently changes the Node a machine runs.
+[`modules/nvm.nix`](modules/nvm.nix) and `rebuild`. Bumping `nodeVersion`
+installs the new Node and re-points `nvm alias default` at it - unless you have
+picked your own default since, in which case yours wins and the new Node is
+merely available to `nvm use`. `--lts` is deliberately not used, so a rebuild
+never silently changes the Node a machine runs.
 
 ### PATH precedence
 

@@ -14,6 +14,9 @@
 #   idempotent         second run     -> no `nvm` calls at all, no rewrites
 #   node-present       Node already there, no default alias -> alias only
 #   pin-bump           nvm pin changed -> scripts re-synced, Node untouched
+#   node-pin-bump      Node pin changed -> new Node installed AND default moved
+#   node-pin-bump-user same bump, but the user owns the default -> left alone
+#   self-heal          stamp intact, files gone -> re-synced anyway
 #   install-failure    `nvm install` fails -> exit 0, warning, no default alias
 #   retry-after-failure a failed run leaves nothing that skips the next attempt
 #   respects-user      a user-chosen default alias is never overwritten
@@ -76,7 +79,13 @@ mtime() { stat -f %m "$1" 2>/dev/null || stat -c %Y "$1"; }
 # be reached by the bootstrap's `. nvm.sh && nvm ...`. Its install arm fails
 # whenever $SANDBOX/fail-install exists, so a scenario can flip the network
 # between runs without rebuilding the sandbox.
+#
+# $HOME is exported per scenario, so it is restored on teardown: anything run
+# BETWEEN scenarios (the real-nvm scenario's `nix store prefetch-file`, say)
+# would otherwise run against the previous sandbox's already-deleted $HOME,
+# recreating a throwaway Nix cache there and missing the real one.
 SANDBOX=""
+ORIG_HOME="$HOME"
 make_sandbox() {
   local name="$1"
   SANDBOX=$(mktemp -d "${TMPDIR:-/tmp}/nvm-test-${name}.XXXXXX") || exit 1
@@ -117,15 +126,19 @@ STUBEOF
   printf 'stub bash_completion %s\n' "$name" > "$SANDBOX/store/bash_completion"
 }
 
-cleanup_sandbox() { [ -n "$SANDBOX" ] && rm -rf "$SANDBOX"; SANDBOX=""; }
+cleanup_sandbox() {
+  [ -n "$SANDBOX" ] && rm -rf "$SANDBOX"
+  SANDBOX=""
+  export HOME="$ORIG_HOME"
+}
 
 # Runs the real bootstrap script; echoes combined output and sets RUN_STATUS.
 RUN_STATUS=0
 run_bootstrap() {
-  local pin="${1:-$PINNED_NVM}" out
+  local pin="${1:-$PINNED_NVM}" node="${2:-$PINNED_NODE}" out
   out=$(DOTNIX_NVM_SRC="$SANDBOX/store" \
         DOTNIX_NVM_VERSION="$pin" \
-        DOTNIX_NODE_VERSION="$PINNED_NODE" \
+        DOTNIX_NODE_VERSION="$node" \
         NVM_DIR="$NVM_DIR" \
         STUB_LOG="$STUB_LOG" \
         STUB_FAIL="$STUB_FAIL" \
@@ -195,6 +208,52 @@ scenario_pin_bump() {
   assert_contains "$(cat "$NVM_DIR/nvm.sh")" "stub nvm.sh bumped" "pin-bump: nvm.sh re-synced from the new pin"
   assert_eq "$(cat "$NVM_DIR/.dotnix-nvm-version")" "0.40.6-test" "pin-bump: stamp follows the pin"
   assert_eq "$(count_log install)" "1" "pin-bump: bumping nvm does not reinstall Node"
+  cleanup_sandbox
+}
+
+# Bumping `nodeVersion` in modules/nvm.nix has to actually change the Node the
+# machine runs. Real nvm only auto-sets `default` when no alias exists, so
+# without the Node stamp the new Node would be downloaded and then ignored.
+BUMPED_NODE="v26.0.0"
+
+scenario_node_pin_bump() {
+  make_sandbox node-pin-bump
+  run_bootstrap >/dev/null
+  assert_eq "$(cat "$NVM_DIR/alias/default")" "$PINNED_NODE" "node-pin-bump: first run defaults to the original pin"
+  run_bootstrap "$PINNED_NVM" "$BUMPED_NODE" >/dev/null
+  assert_eq "$RUN_STATUS" "0" "node-pin-bump: exits 0"
+  assert_executable "$NVM_DIR/versions/node/$BUMPED_NODE/bin/node" "node-pin-bump: the newly pinned Node is installed"
+  assert_eq "$(count_log install)" "2" "node-pin-bump: exactly one install per pin"
+  assert_eq "$(cat "$NVM_DIR/alias/default")" "$BUMPED_NODE" "node-pin-bump: default alias follows the pin the flake owns"
+  assert_eq "$(cat "$NVM_DIR/.dotnix-node-version")" "$BUMPED_NODE" "node-pin-bump: Node stamp follows the pin"
+  cleanup_sandbox
+}
+
+scenario_node_pin_bump_user() {
+  make_sandbox node-pin-bump-user
+  run_bootstrap >/dev/null
+  # The user picks their own default, THEN the flake's Node pin moves.
+  printf 'v20.11.1\n' > "$NVM_DIR/alias/default"
+  run_bootstrap "$PINNED_NVM" "$BUMPED_NODE" >/dev/null
+  assert_eq "$RUN_STATUS" "0" "node-pin-bump-user: exits 0"
+  assert_executable "$NVM_DIR/versions/node/$BUMPED_NODE/bin/node" "node-pin-bump-user: the newly pinned Node is still installed"
+  assert_eq "$(cat "$NVM_DIR/alias/default")" "v20.11.1" "node-pin-bump-user: a user-chosen default survives a pin bump"
+  assert_eq "$(count_log alias)" "0" "node-pin-bump-user: never re-aliases over the user's choice"
+  cleanup_sandbox
+}
+
+scenario_self_heal() {
+  make_sandbox self-heal
+  run_bootstrap >/dev/null
+  # A later upstream `curl | bash`, or a stray `rm`, guts $NVM_DIR while the
+  # stamp still claims the pin is satisfied.
+  rm -f "$NVM_DIR/nvm.sh"
+  : > "$NVM_DIR/bash_completion"
+  local out; out=$(run_bootstrap)
+  assert_eq "$RUN_STATUS" "0" "self-heal: exits 0"
+  assert_contains "$(cat "$NVM_DIR/nvm.sh")" "stub nvm.sh self-heal" "self-heal: a deleted nvm.sh is restored even with a matching stamp"
+  assert_contains "$(cat "$NVM_DIR/bash_completion")" "stub bash_completion self-heal" "self-heal: an emptied bash_completion is restored"
+  assert_not_contains "$out" "nvm-bootstrap:" "self-heal: repairs silently, no warning"
   cleanup_sandbox
 }
 
@@ -309,6 +368,9 @@ scenario_fresh
 scenario_idempotent
 scenario_node_present
 scenario_pin_bump
+scenario_node_pin_bump
+scenario_node_pin_bump_user
+scenario_self_heal
 scenario_install_failure
 scenario_retry_after_failure
 scenario_respects_user

@@ -82,6 +82,21 @@ of a binary wins. The contract, and why each block sits where it does, is
 on every platform - verify by diffing `command -v` for the affected tools
 between the old and new generated `.zshrc`, not by reading the diff.
 
+## nvm is installed by activation, not by a package
+
+nixpkgs ships no `nvm` and `$NVM_DIR` must stay writable, so `modules/nvm.nix`
+hash-pins nvm's scripts into the store and a home-manager activation copies them
+into `~/.nvm`, then has nvm install a pinned LTS Node. Both pins live at the top
+of that module; the reasoning and the rejected alternatives are in its header
+comment, and "Node and `nvm`" in `README.md` is the user-facing version.
+
+The activation logic is `lib/nvm-bootstrap.sh` rather than inline Nix so it can
+be run for real - `bash tests/nvm_test.sh` exercises it against a sandboxed
+`$HOME` and a stub nvm (hermetic; `DOTNIX_NVM_TEST_ONLINE=1` adds a real-nvm
+scenario). It must stay idempotent, network-free once satisfied, and must never
+exit non-zero. Node itself stays nvm's: declaring `node`/`npm`/`npx`/`corepack`
+anywhere in the flake breaks the PATH contract above, and the test asserts it.
+
 ## Symlink single files into directories an app owns
 
 `home.file` in `modules/common.nix` links most dotfile dirs whole, but not a

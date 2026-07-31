@@ -46,6 +46,7 @@ let
 in
 {
   imports = [
+    ./nvm.nix
     ./agent-tooling/axi.nix
     ./agent-tooling/rtk.nix
     ./agent-tooling/caveman.nix
@@ -260,6 +261,12 @@ in
       # is declared in this flake, so nothing here competes with it, and nvm's
       # own `nvm use` reshuffling continues to work because it rewrites only
       # its own entry.
+      #
+      # nvm and a default LTS Node are installed by modules/nvm.nix (a pinned
+      # fetch into the store, copied into $NVM_DIR on activation) - that module
+      # explains why nvm can't just be a package. The `-s` guards stay: they
+      # keep a brand-new shell working on the one machine where that
+      # activation's Node download failed, and cost a stat either way.
       export NVM_DIR="$HOME/.nvm"
       [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
       [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"

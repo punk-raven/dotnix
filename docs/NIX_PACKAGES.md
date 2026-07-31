@@ -24,6 +24,16 @@ Installed on macOS, Linux and WSL alike.
 `home-manager` (the standalone CLI, Linux/WSL only - macOS goes through
 `darwin-rebuild`)
 
+## Node toolchain (`modules/nvm.nix`)
+
+Installed on macOS, Linux and WSL alike, but **not** as `home.packages` entries -
+see the nvm note at the bottom of this file.
+
+| Item | Pinned in | Lands at |
+|------|-----------|----------|
+| `nvm` (`nvm.sh`, `nvm-exec`, `bash_completion`) | `nvmVersion` | `~/.nvm/` (copied from the store on activation) |
+| default LTS Node (`node`, `npm`, `npx`, `corepack`) | `nodeVersion` | `~/.nvm/versions/node/<v>/bin` (fetched by `nvm install`) |
+
 ## nix-darwin `environment.systemPackages` (`modules/darwin.nix`)
 
 `starship`
@@ -122,3 +132,15 @@ config is an out-of-store symlink and plugins are fetched by neovim's built-in
   system python. See "PATH precedence" in [`../README.md`](../README.md).
 - `gnumake` is 4.4.1, ahead of the 3.81 that ships with the Xcode CLT, and it
   shadows `/usr/bin/make` on `PATH`.
+- **nvm is installed, but Node is not a Nix package.** `modules/nvm.nix` fetches
+  nvm's scripts into the store hash-pinned and copies them into `~/.nvm` on
+  activation, then has nvm install the pinned LTS Node. It cannot be a
+  `home.packages` entry: nvm is a shell library you `source`, nixpkgs ships no
+  `nvm` attribute at all, and `$NVM_DIR` has to stay writable because nvm keeps
+  `versions/`, `alias/` and `.cache/` in it. No `node`/`npm`/`npx`/`corepack` is
+  declared anywhere in the flake, so nvm keeps owning them - which is also why
+  the `PATH` ordering in `common.nix` puts the Nix profile above nvm's
+  global-install dir. The `nodejs_22` in `agent-tooling/axi-packages.nix` and
+  `agent-tooling/caveman.nix` is a build-time interpreter baked into those
+  wrappers by absolute store path; it never reaches `PATH`. See "Node and
+  `nvm`" in [`../README.md`](../README.md).

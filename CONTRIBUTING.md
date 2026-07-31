@@ -32,7 +32,7 @@ activate a real system. All installer validation is hermetic - see below.
 
 ## Validating a change
 
-Three checks cover nearly everything. Run whichever apply, and record what you
+Four checks cover nearly everything. Run whichever apply, and record what you
 ran in your pull request.
 
 **1. Evaluate the flake - do not build it.** Building compiles the world;
@@ -69,7 +69,19 @@ bash tests/install_test.sh
 It runs the real `install.sh` against a PATH-masked sandbox of stub executables,
 so it never touches the network, the Nix store, Homebrew, sudo, or system state.
 
-**3. Shell/`PATH` changes.** If you reorder or add a block in the zsh
+**3. nvm/Node tests**, if you touched `lib/nvm-bootstrap.sh` or the pins in
+`modules/nvm.nix`:
+
+```bash
+bash tests/nvm_test.sh
+```
+
+Hermetic by default - each scenario gets a throwaway `$HOME` and a stub `nvm`,
+so no Node is downloaded. `DOTNIX_NVM_TEST_ONLINE=1` adds one scenario that
+sources the real upstream `nvm.sh`; it needs `nix` and, on a cold store, the
+network.
+
+**4. Shell/`PATH` changes.** If you reorder or add a block in the zsh
 `initContent` in `modules/common.nix`, verify by diffing `command -v` for the
 affected tools between the old and new generated `.zshrc` - not by reading the
 diff. The contract is documented under "PATH precedence" in `README.md`.

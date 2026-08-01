@@ -25,6 +25,8 @@ commands. Evaluate, do not build. Never run install.sh for real in a checkout.
 - [ ] `nix eval` succeeds on the **linux** surface
 - [ ] `bash tests/install_test.sh` passes (required if `install.sh`,
       `install.ps1`, or the bootstrap refs in `flake.nix` / `README.md` changed)
+- [ ] `bash tests/nvm_test.sh` passes (required if `lib/nvm-bootstrap.sh` or the
+      pins in `modules/nvm.nix` changed)
 
 ## Checklist
 

@@ -81,10 +81,25 @@ so no Node is downloaded. `DOTNIX_NVM_TEST_ONLINE=1` adds one scenario that
 sources the real upstream `nvm.sh`; it needs `nix` and, on a cold store, the
 network.
 
-**4. Shell/`PATH` changes.** If you reorder or add a block in the zsh
-`initContent` in `modules/common.nix`, verify by diffing `command -v` for the
-affected tools between the old and new generated `.zshrc` - not by reading the
-diff. The contract is documented under "PATH precedence" in `README.md`.
+**4. Shell/`PATH` changes**, if you reorder or add a block in the zsh
+`initContent` or `envExtra` in `modules/common.nix`, or change
+`home.sessionPath`:
+
+```bash
+bash tests/path_test.sh
+```
+
+It runs a real `zsh` against the generated `.zshenv`/`.zshrc` in a throwaway
+`$HOME` of stub binaries and asserts the resulting order for a fresh
+non-interactive shell, a fresh interactive one, and a non-interactive child of
+an interactive one. Unlike the other two suites it is not offline - it evaluates
+the flake, so it needs `nix` and a `config.nix`, and it skips (exit 0) without
+them.
+
+Verify by observed resolution, never by reading the diff: `initContent` becomes
+`.zshrc` and only interactive shells read it, so a block moved between the two
+files changes behaviour that no diff shows. The contract is documented under
+"PATH precedence" in `README.md`.
 
 ## Scope conventions
 

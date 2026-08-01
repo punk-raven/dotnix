@@ -72,15 +72,27 @@ hashes to `pkgs.lib.fakeHash`, rebuild to surface the real hashes, paste back.
 Grab a hash directly with `nix store prefetch-file --json <url>`. Keep all four
 platform hashes in sync (aarch64/x86_64 × darwin/linux).
 
-## The zsh initContent block order is load-bearing
+## The zsh PATH assembly is load-bearing, and spans two files
 
 pyenv, Homebrew, nvm and the Nix-profile re-assertion in `modules/common.nix`
 all *prepend* to `PATH`, so the order those blocks appear in decides which copy
 of a binary wins. The contract, and why each block sits where it does, is
 "PATH precedence" in `README.md`; the reasoning is repeated inline in
-`modules/common.nix`. Reordering or adding a block there changes tool resolution
-on every platform - verify by diffing `command -v` for the affected tools
-between the old and new generated `.zshrc`, not by reading the diff.
+`modules/common.nix`.
+
+Which generated file a block lands in matters as much as its order:
+`initContent` becomes `.zshrc`, read by **interactive shells only**, while
+`envExtra` becomes `.zshenv`, read by every zsh. So the tail of the order
+(profile > nvm > `~/.yarn/bin`) is asserted in both, and `.zshenv` skips its
+copy when `__DOTNIX_PATH_ASSEMBLED` says a parent shell already finished the
+job - without that, every `zsh -c` from an interactive shell would demote
+Homebrew's python3. `home.sessionPath` entries land *above* the profile unless
+`demotedSessionPathDirs` excludes them.
+
+Never verify this by reading the diff. `bash tests/path_test.sh` runs a real
+zsh against the generated files in a sandboxed `$HOME` for all three shapes
+(fresh non-interactive, fresh interactive, non-interactive child of an
+interactive shell); it needs `nix` and a `config.nix` and skips without them.
 
 ## nvm is installed by activation, not by a package
 
@@ -89,6 +101,10 @@ hash-pins nvm's scripts into the store and a home-manager activation copies them
 into `~/.nvm`, then has nvm install a pinned LTS Node. Both pins live at the top
 of that module; the reasoning and the rejected alternatives are in its header
 comment, and "Node and `nvm`" in `README.md` is the user-facing version.
+`nodeVersion` is also published as the read-only `dotnix.nvm.nodeVersion` /
+`dotnix.nvm.nodeBinDir` options, because `modules/common.nix` needs that bin dir
+on `home.sessionPath` to give non-interactive shells a `node`; consume those
+rather than re-deriving the path.
 
 The activation logic is `lib/nvm-bootstrap.sh` rather than inline Nix so it can
 be run for real - `bash tests/nvm_test.sh` exercises it against a sandboxed

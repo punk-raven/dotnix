@@ -387,6 +387,14 @@ Two consequences worth knowing:
   (`nvm alias default <v>`), it is yours: activation never touches it again, and
   `nvm install <v>` / `nvm use <v>` behave normally. No
   `node`/`npm`/`npx`/`corepack` is declared anywhere in this flake.
+- **Non-interactive shells get the pinned Node, not your default.** `nvm.sh` is
+  sourced from `~/.zshrc`, which only interactive shells read, so `node` reaches
+  a `zsh -c ...` through a `home.sessionPath` entry pointing straight at the
+  pinned version's `bin` instead. Both come from the same `nodeVersion` in
+  [`modules/nvm.nix`](modules/nvm.nix), so a bump moves them together - but if
+  you set your own `nvm alias default`, interactive shells follow it and
+  non-interactive ones stay on the pin. See
+  [PATH precedence](#path-precedence).
 
 Why an activation step instead of a package: nixpkgs ships no `nvm` (it is a
 shell library, not a program), Homebrew's formula would serve macOS only, and
@@ -423,10 +431,9 @@ Read it as three rules:
 
 - **Nix beats the global-install dirs.** `~/.nvm/versions/node/<v>/bin` is where
   stray `npm i -g` binaries land, and `~/.yarn/bin` is the yarn-v1 equivalent, so
-  both sit *below* the Nix profile even though `~/.yarn/bin` is a
-  `home.sessionPath` entry. nvm still owns Node itself - no
-  `node`/`npm`/`npx`/`corepack` is declared anywhere in this flake, and nvm
-  itself is installed into `~/.nvm` by
+  both sit *below* the Nix profile even though both are `home.sessionPath`
+  entries. nvm still owns Node itself - no `node`/`npm`/`npx`/`corepack` is
+  declared anywhere in this flake, and nvm itself is installed into `~/.nvm` by
   [`modules/nvm.nix`](modules/nvm.nix), not put on `PATH` as a package (see
   [Node and `nvm`](#node-and-nvm)). Sourcing it is the *first* of the four
   blocks precisely so it ends up here, and `nvm use <v>` keeps working because
@@ -448,11 +455,51 @@ Read it as three rules:
   would prevent. `~/.cargo/bin` and `~/.bun/bin` keep rustup and bun managing
   their own toolchains, and since `rustup` and `bun` *are* declared in the shared
   CLI set, that is the second bounded exception to "Nix-declared wins" alongside
-  Python. `~/.yarn/bin` is excluded from this hoist for the reason in the first
-  rule.
+  Python. The other two `home.sessionPath` entries - `~/.yarn/bin` and nvm's
+  pinned Node - are excluded from this hoist for the reason in the first rule.
 
 Nothing beyond the overlaps listed above collides, so the ordering changes
 resolution for only the CLIs this flake pins.
+
+#### Non-interactive shells get it too
+
+`initContent` becomes `~/.zshrc`, which **only interactive shells read**. A
+`zsh -c ...` - an editor task, a git hook, a cron entry, an agent shelling out -
+reads `~/.zshenv` and nothing else, so for a long time it saw no `node` at all:
+the nvm block above had never run.
+
+So the tail of the same order is asserted in `~/.zshenv` as well
+(`programs.zsh.envExtra`), and the pinned Node's `bin` is a `home.sessionPath`
+entry rather than only an `nvm.sh` side effect. A non-interactive shell ends up
+with:
+
+```
+~/.local/bin  >  ~/.cargo/bin  >  ~/.bun/bin
+  >  Nix profile  >  nvm  >  ~/.yarn/bin  >  system
+```
+
+pyenv and Homebrew are absent because nothing initialises them there - which is
+the point of the two details that make this work:
+
+- **Which Node.** `.zshenv` cannot resolve an nvm alias without sourcing all of
+  `nvm.sh`, so it uses the version [`modules/nvm.nix`](modules/nvm.nix) pins -
+  the one activation guarantees is installed. Interactive shells still follow
+  `nvm use` / `nvm alias default`, because sourcing `nvm.sh` rewrites that entry
+  in place. Set your own default and the two diverge: interactive shells get
+  yours, non-interactive ones stay on the pin.
+- **`__DOTNIX_PATH_ASSEMBLED`.** `~/.zshenv` is read by *every* zsh, including
+  one spawned from an interactive shell that has already put pyenv and Homebrew
+  on top - and `~/.zshrc` will not run again to restore them. Re-hoisting the
+  Nix profile there would silently demote Homebrew's `python3`, the one
+  collision the second rule above exists to prevent. `~/.zshrc` therefore
+  exports this marker once it has finished assembling `PATH`, and `~/.zshenv`
+  skips its own hoist when it sees it: an already-correct `PATH` is inherited,
+  not rebuilt.
+
+`bash tests/path_test.sh` runs a real zsh in all three shapes (fresh
+non-interactive, fresh interactive, non-interactive child of an interactive
+shell) against a throwaway `$HOME` of stub binaries and asserts the resulting
+order, so this is checkable rather than merely written down.
 
 > **One-time host cleanup.** The ordering fix makes the pinned build win even
 > while a same-named npm global is installed, but leaving the duplicates around
@@ -584,6 +631,7 @@ lib/prompt.sh             shared prompt/detect helpers
 lib/nvm-bootstrap.sh      the nvm/Node activation step, kept standalone so it can be tested
 tests/install_test.sh     hermetic PATH-masked stub test
 tests/nvm_test.sh         hermetic sandbox test of the nvm/Node activation
+tests/path_test.sh        runs a real zsh against the generated rc files, asserts PATH precedence
 docs/
   NIX_PACKAGES.md         full inventory of what this flake installs, per module
   CROSS_PLATFORM_PLAN.md  the design/build plan this repo was cut from

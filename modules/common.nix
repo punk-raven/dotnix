@@ -25,12 +25,14 @@ let
       "DOTNIX_CONFIG=${configPath} home-manager switch -b backup --impure --flake ${dotfilesDir}#${cfg.username}";
 
   # `home.sessionPath` entries that must NOT be hoisted above the Nix profile.
-  # `~/.yarn/bin` is the yarn-v1 global-binary dir - the same class as the nvm
-  # global dir, i.e. somewhere `yarn global add <cli>` can drop a copy of a CLI
-  # this flake pins - so it belongs BELOW the profile for exactly the reason nvm
-  # does. Excluding it here does not drop it from PATH: home-manager's own
-  # session-vars prefix already places it there, below the profile.
-  demotedSessionPathDirs = [ "$HOME/.yarn/bin" ];
+  # Both are global-install dirs - somewhere `npm i -g` or `yarn global add
+  # <cli>` can drop a copy of a CLI this flake pins - so both belong BELOW the
+  # profile. `dotnix.nvm.nodeBinDir` is the pinned Node's bin dir, published by
+  # modules/nvm.nix so the version lives in one place; `~/.yarn/bin` is the
+  # yarn-v1 equivalent. Excluding them here does not drop them from PATH:
+  # home-manager's own session-vars prefix already places them there, and the
+  # re-prepend below then moves the profile in front of them.
+  demotedSessionPathDirs = [ config.dotnix.nvm.nodeBinDir "$HOME/.yarn/bin" ];
 
   # The directories home-manager itself puts at the front of the session PATH,
   # in home-manager's own order: the declared `home.sessionPath` entries (minus
@@ -39,10 +41,58 @@ let
   # `home.sessionPath` changes and on both surfaces - `home.profileDirectory` is
   # /etc/profiles/per-user/<user> under nix-darwin (`useUserPackages = true`)
   # and ~/.nix-profile under standalone home-manager on Linux/WSL. Re-asserted
-  # in the zsh init below.
+  # in .zshenv and in the zsh init below.
   managedPathDirs = lib.concatStringsSep " " (map (p: "\"${p}\"")
     (lib.subtractLists demotedSessionPathDirs config.home.sessionPath
       ++ [ "${config.home.profileDirectory}/bin" ]));
+
+  # The re-prepend itself, shared by .zshenv and .zshrc so the two can never
+  # drift. `''${path:|arr}` drops the stale copies instead of duplicating them,
+  # so this reorders rather than grows PATH and is idempotent if the file it
+  # sits in gets re-sourced.
+  managedPathReassert = lib.removeSuffix "\n" ''
+    typeset -a _dotnix_managed_path
+    _dotnix_managed_path=( ${managedPathDirs} )
+    path=( $_dotnix_managed_path ''${path:|_dotnix_managed_path} )
+    unset _dotnix_managed_path
+  '';
+
+  # Nix's `''` strings strip only the LITERAL parts' common indentation, so an
+  # interpolated multi-line block lands flush against the interpolation point
+  # and every later line at column 0. This re-indents one so the generated file
+  # stays readable when the block sits inside an `if`.
+  indentBlock = prefix: block:
+    lib.concatMapStringsSep "\n" (l: if l == "" then l else prefix + l)
+      (lib.splitString "\n" (lib.removeSuffix "\n" block));
+
+  # Set once .zshrc has finished assembling PATH, and read by .zshenv. See the
+  # comment on `envExtra` below for what it guards against.
+  pathAssembledMarker = "__DOTNIX_PATH_ASSEMBLED";
+
+  # Opening line of the `envExtra` block below. A real comment in the generated
+  # .zshenv, so it costs nothing at runtime, and unique, so the check below can
+  # locate the block by it.
+  envExtraMarker = "# dotnix: PATH precedence for non-interactive shells";
+
+  # home-manager assembles .zshenv from several fragments, and `envExtra`
+  # currently lands AFTER the one that sources hm-session-vars.sh - the fragment
+  # that exports `home.sessionPath` in front of everything. That is the only
+  # order in which re-prepending the profile can work, and nothing in
+  # home-manager's API promises it, so assert it rather than trust it: were a
+  # home-manager bump to move `envExtra` above that line, non-interactive shells
+  # would silently go back to nvm and ~/.yarn/bin outranking the Nix profile -
+  # the exact shadowing this repo already fixed once for interactive shells.
+  #
+  # Matched by suffix rather than by key because the key follows
+  # `programs.zsh.dotDir` ("./.zshenv" while that is the home directory).
+  zshenvFiles = lib.filterAttrs (n: f: lib.hasSuffix "/.zshenv" n && f.text != null)
+    config.home.file;
+  zshenvSplit = lib.splitString envExtraMarker
+    (lib.concatMapStringsSep "\n" (f: f.text) (lib.attrValues zshenvFiles));
+  envExtraLandsAfterSessionVars =
+    zshenvFiles != { }
+    && builtins.length zshenvSplit == 2
+    && lib.hasInfix "hm-session-vars.sh" (builtins.head zshenvSplit);
 in
 {
   imports = [
@@ -62,8 +112,31 @@ in
     "$HOME/.local/bin"    # native Claude Code + other manual/native installs
     "$HOME/.cargo/bin"    # rust / cargo
     "$HOME/.bun/bin"      # bun
+    # The pinned Node from modules/nvm.nix. It is here, and not left to the
+    # nvm.sh sourcing in the zsh init below, because that init only runs for
+    # INTERACTIVE shells - so `zsh -c 'node ...'`, editor tasks, hooks and cron
+    # saw no `node` at all. Listed before ~/.yarn/bin so the two keep the
+    # documented relative order once both are demoted below the Nix profile.
+    config.dotnix.nvm.nodeBinDir
     "$HOME/.yarn/bin"     # yarn global binaries
   ];
+
+  # See `envExtraLandsAfterSessionVars` above: this guards the one home-manager
+  # implementation detail the non-interactive PATH ordering rests on.
+  assertions = [{
+    assertion = envExtraLandsAfterSessionVars;
+    message = ''
+      modules/common.nix: could not confirm that programs.zsh.envExtra still
+      lands after the hm-session-vars.sh line in the generated .zshenv.
+
+      That ordering is what keeps the Nix profile above nvm and ~/.yarn/bin in
+      non-interactive shells. Re-check how home-manager assembles .zshenv
+      (modules/programs/zsh/default.nix), then either restore the ordering or
+      move the PATH-precedence block into a fragment that runs after
+      hm-session-vars.sh. Its first line is:
+        ${envExtraMarker}
+    '';
+  }];
 
   # One shared CLI environment on every platform.
   home.packages = with pkgs; [
@@ -230,6 +303,29 @@ in
       # present, so this never touches anything outside modules/darwin.nix.
       brewup = "brew update && brew upgrade";
     };
+
+    # .zshenv - read by EVERY zsh, interactive or not, and the only dotfile a
+    # `zsh -c ...` reads at all. home-manager's own fragment above this one
+    # exports `home.sessionPath` in front of the whole inherited PATH, which
+    # would put the two demoted dirs (nvm's pinned Node, ~/.yarn/bin) above the
+    # Nix profile - so re-assert the managed order right after it, exactly as
+    # the interactive init does further down.
+    #
+    # WHY THE GUARD. A non-interactive zsh spawned FROM an interactive one
+    # inherits a PATH that .zshrc already assembled, pyenv and Homebrew
+    # included, and .zshrc will not run again to put them back on top. Hoisting
+    # the profile unconditionally there would demote Homebrew's python3 below
+    # the Nix one for every `zsh -c` - the one collision "PATH precedence" in
+    # README.md says must not happen. So the hoist runs only when no parent
+    # shell has already done the full assembly; when one has, its PATH is
+    # already correct and the right move is to leave it alone.
+    envExtra = ''
+      ${envExtraMarker}
+      if [ -z "''${${pathAssembledMarker}-}" ]; then
+      ${indentBlock "  " managedPathReassert}
+      fi
+    '';
+
     initContent = ''
       bindkey '^f' autosuggest-accept
 
@@ -253,6 +349,11 @@ in
       # live) without displacing pyenv's or Homebrew's Python, which is the one
       # place the two goals genuinely conflict. See "PATH precedence" in
       # README.md.
+      #
+      # This runs for INTERACTIVE shells only. Non-interactive ones get the
+      # same tail of that order (profile > nvm > ~/.yarn/bin) from the
+      # `envExtra` block above, which is why the pinned Node is a
+      # `home.sessionPath` entry and not only an nvm.sh side effect.
       # ---------------------------------------------------------------------
 
       # nvm. Runs first, so it ends up BELOW the Nix profile: npm globals
@@ -267,6 +368,13 @@ in
       # explains why nvm can't just be a package. The `-s` guards stay: they
       # keep a brand-new shell working on the one machine where that
       # activation's Node download failed, and cost a stat either way.
+      #
+      # Sourcing nvm.sh is what makes `nvm use <v>` and a user-chosen `nvm alias
+      # default` take effect: nvm strips every $NVM_DIR entry from PATH and
+      # re-adds the one it selected, which includes the pinned entry .zshenv
+      # put there. So interactive shells follow nvm, non-interactive ones get
+      # the pinned Node - the only version lib/nvm-bootstrap.sh guarantees is
+      # installed.
       export NVM_DIR="$HOME/.nvm"
       [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
       [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
@@ -294,17 +402,11 @@ in
       #   - `~/.cargo/bin` and `~/.bun/bin`: rustup and bun manage their own
       #     toolchains out of those dirs, so they keep owning
       #     `cargo`/`rustc`/`rustup` and `bun`/`bunx`.
-      # `~/.yarn/bin` is NOT an exception - it is a global-install dir like
-      # nvm's, so `demotedSessionPathDirs` above keeps it out of this array and
-      # it stays below the profile where home-manager already put it.
-      #
-      # `''${path:|arr}` drops the stale copies instead of duplicating them, so
-      # this reorders rather than grows PATH and is idempotent if the rc file
-      # gets re-sourced.
-      typeset -a _dotnix_managed_path
-      _dotnix_managed_path=( ${managedPathDirs} )
-      path=( $_dotnix_managed_path ''${path:|_dotnix_managed_path} )
-      unset _dotnix_managed_path
+      # Neither `~/.yarn/bin` nor nvm's pinned Node dir is an exception - both
+      # are global-install dirs, so `demotedSessionPathDirs` above keeps them
+      # out of this array and they stay below the profile where home-manager
+      # already put them.
+      ${managedPathReassert}
 
       # Homebrew (macOS only) - MUST run before anything that calls `brew`.
       # Apple Silicon -> /opt/homebrew, Intel -> /usr/local. Runtime-guarded, so
@@ -333,6 +435,14 @@ in
       export PYENV_ROOT="$HOME/.pyenv"
       [ -d "$PYENV_ROOT/bin" ] && export PATH="$PYENV_ROOT/bin:$PATH"
       command -v pyenv >/dev/null && eval "$(pyenv init -)"
+
+      # PATH is now fully assembled, pyenv and Homebrew included. Exported so a
+      # non-interactive child zsh (which reads .zshenv but never this file) can
+      # tell "inherited a finished PATH" from "starting from scratch" and skip
+      # the re-prepend there - see the `envExtra` block above. It has to be set
+      # after the four blocks, not inside one of them, because only here is the
+      # claim actually true.
+      export ${pathAssembledMarker}=1
 
       # bun completions
       [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"

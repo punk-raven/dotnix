@@ -30,6 +30,15 @@
 # Nix profile above nvm's global-install dir for exactly that reason. The
 # `nodejs_22` in modules/agent-tooling/axi-packages.nix is a private build-time
 # dep of the AXI CLIs and never reaches PATH.
+#
+# WHAT THIS MODULE PUBLISHES
+#
+# `dotnix.nvm.nodeVersion` / `dotnix.nvm.nodeBinDir` are read-only options, not
+# just internal bindings, because modules/common.nix has to put the pinned
+# Node's bin directory on `home.sessionPath` (that is what makes `node` visible
+# to NON-interactive shells, which never read .zshrc where nvm.sh is sourced).
+# Publishing them keeps the version in exactly one place: a `nodeVersion` bump
+# moves the PATH entry with it, and the two cannot drift.
 { config, pkgs, lib, ... }:
 
 let
@@ -71,17 +80,56 @@ let
   ]);
 in
 {
-  # Runs after writeBoundary, so $HOME's managed links already exist. Cheap on
-  # the common path: two file tests and a `cat`, no network, no writes. See
-  # lib/nvm-bootstrap.sh for the idempotency and failure contract - notably that
-  # it never exits non-zero, so a failed Node download cannot take an otherwise
-  # good activation down with it.
-  home.activation.nvmBootstrap = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    DOTNIX_NVM_SRC=${nvmScripts} \
-    DOTNIX_NVM_VERSION=${nvmVersion} \
-    DOTNIX_NODE_VERSION=${nodeVersion} \
-    NVM_DIR="${config.home.homeDirectory}/.nvm" \
-    PATH="$PATH:${fetchTools}" \
-      $DRY_RUN_CMD ${pkgs.bash}/bin/bash ${../lib/nvm-bootstrap.sh}
-  '';
+  options.dotnix.nvm = {
+    nodeVersion = lib.mkOption {
+      type = lib.types.str;
+      readOnly = true;
+      description = ''
+        The Node release this flake pins and installs through nvm. Read-only:
+        `nodeVersion` in modules/nvm.nix is the single place it is written.
+      '';
+    };
+
+    nodeBinDir = lib.mkOption {
+      type = lib.types.str;
+      readOnly = true;
+      description = ''
+        Where the pinned Node's binaries land under $NVM_DIR, in the
+        SHELL-LITERAL `$HOME/...` form the other `home.sessionPath` entries in
+        modules/common.nix use - home-manager writes those through verbatim, so
+        the shell expands `$HOME`, not Nix.
+
+        This is deliberately the pinned version's directory rather than
+        whatever `nvm alias default` currently points at: lib/nvm-bootstrap.sh
+        guarantees the pinned Node exists, and a non-interactive shell cannot
+        resolve an nvm alias without sourcing all of nvm.sh. A shell that DOES
+        source it (any interactive one) has nvm rewrite this entry in place, so
+        `nvm use` still wins there.
+      '';
+    };
+  };
+
+  config = {
+    dotnix.nvm = {
+      inherit nodeVersion;
+      # $NVM_DIR is ~/.nvm (set in modules/common.nix's zsh init and in the
+      # activation below); lib/nvm-bootstrap.sh installs into
+      # $NVM_DIR/versions/node/<version>.
+      nodeBinDir = "$HOME/.nvm/versions/node/${nodeVersion}/bin";
+    };
+
+    # Runs after writeBoundary, so $HOME's managed links already exist. Cheap on
+    # the common path: two file tests and a `cat`, no network, no writes. See
+    # lib/nvm-bootstrap.sh for the idempotency and failure contract - notably
+    # that it never exits non-zero, so a failed Node download cannot take an
+    # otherwise good activation down with it.
+    home.activation.nvmBootstrap = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      DOTNIX_NVM_SRC=${nvmScripts} \
+      DOTNIX_NVM_VERSION=${nvmVersion} \
+      DOTNIX_NODE_VERSION=${nodeVersion} \
+      NVM_DIR="${config.home.homeDirectory}/.nvm" \
+      PATH="$PATH:${fetchTools}" \
+        $DRY_RUN_CMD ${pkgs.bash}/bin/bash ${../lib/nvm-bootstrap.sh}
+    '';
+  };
 }

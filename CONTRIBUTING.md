@@ -9,7 +9,8 @@ correct on all three surfaces", not "does it match a house style".
 Read [`AGENTS.md`](AGENTS.md). It is short and covers the traps that cause most
 of the breakage here: per-user values live only in `config.nix` (kept **outside**
 the repo), the installer must never be run for real in a checkout, and the zsh
-`initContent` block order is load-bearing for `PATH` precedence.
+`PATH` assembly is load-bearing - it spans both generated files, `.zshrc` and
+`.zshenv`.
 
 For anything larger than a one-line fix, open an issue first so the approach can
 be agreed before you spend time on it.

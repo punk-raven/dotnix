@@ -27,6 +27,8 @@ commands. Evaluate, do not build. Never run install.sh for real in a checkout.
       `install.ps1`, or the bootstrap refs in `flake.nix` / `README.md` changed)
 - [ ] `bash tests/nvm_test.sh` passes (required if `lib/nvm-bootstrap.sh` or the
       pins in `modules/nvm.nix` changed)
+- [ ] `bash tests/path_test.sh` passes (required if the zsh `initContent` /
+      `envExtra` blocks or `home.sessionPath` in `modules/common.nix` changed)
 
 ## Checklist
 
@@ -34,8 +36,6 @@ commands. Evaluate, do not build. Never run install.sh for real in a checkout.
 - [ ] No secrets, tokens, or real `config.nix` contents committed
 - [ ] `README.md` updated if documented behaviour changed
 - [ ] No auto-generated file hand-edited
-- [ ] If the zsh `initContent` block order changed, I diffed `command -v` for the
-      affected tools between the old and new generated `.zshrc`
 
 ## Notes
 

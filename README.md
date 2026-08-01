@@ -23,7 +23,7 @@ per-user values instead of hardcoding them.
 - [Prerequisites](#prerequisites) - [macOS](#-macos) · [Linux](#-linux) · [Windows](#-windows-wsl2)
 - [Install](#install)
 - [How `config.nix` is generated](#how-confignix-is-generated)
-- [What you get](#what-you-get) - [PATH precedence](#path-precedence) · [GPG signing](#gpg-signing)
+- [What you get](#what-you-get) - [Node and `nvm`](#node-and-nvm) · [PATH precedence](#path-precedence) · [GPG signing](#gpg-signing)
 - [Flake inputs](#flake-inputs)
 - [Repository layout](#repository-layout)
 - [License](#license) · [Contributing](#contributing)
@@ -67,13 +67,6 @@ curl -fsSL https://claude.ai/install.sh | bash
 brew install codex          # or: npm i -g @openai/codex
 ```
 
-**Node.js** - needed by the npm-based agent installs and JS projects (`nvm` is
-already sourced by the shell):
-
-```sh
-nvm install --lts
-```
-
 **Brave / Chromium** - `chrome-devtools-axi` and the `brave-cdp` helper attach to
 it on `:9222`:
 
@@ -83,6 +76,12 @@ brew install --cask brave-browser
 
 **OpenCode** (`opencode`) - optional; its config is symlinked either way. See
 https://opencode.ai.
+
+> **`nvm` and Node are not manual.** The first activation installs `nvm` and a
+> default LTS Node for you, so the `npm i -g` above works on a fresh Mac - but
+> from a **new** terminal: `nvm` is sourced by the generated `.zshrc`, so the
+> shell that ran `install.sh` has no `npm` yet. See
+> [Node and `nvm`](#node-and-nvm).
 
 ### 🐧 Linux
 
@@ -109,16 +108,14 @@ curl -fsSL https://claude.ai/install.sh | bash
 npm i -g @openai/codex
 ```
 
-**Node.js** - needed by the npm-based agent installs and JS projects (`nvm` is
-already sourced by the shell):
-
-```sh
-nvm install --lts
-```
-
 **OpenCode** (`opencode`) - optional; its config is symlinked either way. See
 https://opencode.ai.
 
+> **`nvm` and Node are no longer manual either.** They arrive with the first
+> activation on every surface, and are on `PATH` in a **new** terminal - `nvm`
+> is sourced by the generated `.zshrc`, so the shell that ran `install.sh` has
+> no `npm` yet. See [Node and `nvm`](#node-and-nvm).
+>
 > **Brave is no longer manual on Linux/WSL.** `chrome-devtools-axi` and the
 > `brave-cdp` helper need a browser to attach to on `:9222`, so `brave` is
 > declared in [`modules/gui.nix`](modules/gui.nix) and installed on every
@@ -336,6 +333,8 @@ installer already do this for you).
   `gnumake`, `pre-commit`, `zip`, `unzip`, Nerd/Noto fonts.
 - **Shell**: `zsh` (oh-my-zsh, autosuggestion, syntax-highlighting) + `starship`,
   with the same aliases everywhere (`rebuild` re-applies the config per platform).
+- **Node** (all platforms): `nvm` plus a pinned default LTS Node, installed on
+  the first activation - see [Node and `nvm`](#node-and-nvm).
 - **Agent tooling** (all platforms): `gh-axi`, `chrome-devtools-axi`,
   `lavish-axi`, `tasks-axi`, `rtk`, `ccusage`, `codegraph`, and caveman - each
   pinned and reproducible, with the Linux/Intel release artifacts selected
@@ -364,6 +363,46 @@ installer already do this for you).
 > because the caveman-compress skill ships Python scripts - and the `PATH`
 > ordering below is arranged so it never displaces pyenv or the system python.
 
+### Node and `nvm`
+
+`nvm` and a default LTS Node arrive with the first activation on **all three
+surfaces** - nothing to install by hand. [`modules/nvm.nix`](modules/nvm.nix)
+pins both:
+
+| Pin | Where it comes from |
+|-----|---------------------|
+| `nvm` itself | Fetched at **build** time from the pinned release tag, hash-locked into the Nix store, then copied into `$NVM_DIR` (`~/.nvm`) by the activation |
+| the default Node | Fetched at **activation** time by `nvm install <pinned version>`, then set as `nvm alias default` |
+
+Two consequences worth knowing:
+
+- **The first activation on a fresh machine downloads Node** (~50MB, a few
+  seconds). Every later activation is a couple of `stat` calls: nothing is
+  re-downloaded once the pinned version is present. A failed download warns and
+  leaves `nvm` working - it never fails the whole activation, and the next
+  `rebuild` retries.
+- **`nvm` keeps owning Node.** The default alias is written when you have none,
+  and moved when a `nodeVersion` bump arrives *and* the current default is still
+  exactly the one the last activation wrote. The moment you set your own
+  (`nvm alias default <v>`), it is yours: activation never touches it again, and
+  `nvm install <v>` / `nvm use <v>` behave normally. No
+  `node`/`npm`/`npx`/`corepack` is declared anywhere in this flake.
+
+Why an activation step instead of a package: nixpkgs ships no `nvm` (it is a
+shell library, not a program), Homebrew's formula would serve macOS only, and
+`$NVM_DIR` cannot be a read-only store symlink because `nvm` writes `versions/`,
+`alias/` and `.cache/` into it. The full reasoning is at the top of
+[`modules/nvm.nix`](modules/nvm.nix); the activation logic itself is
+[`lib/nvm-bootstrap.sh`](lib/nvm-bootstrap.sh), covered by
+`bash tests/nvm_test.sh`.
+
+To move either pin, edit `nvmVersion` / `nodeVersion` in
+[`modules/nvm.nix`](modules/nvm.nix) and `rebuild`. Bumping `nodeVersion`
+installs the new Node and re-points `nvm alias default` at it - unless you have
+picked your own default since, in which case yours wins and the new Node is
+merely available to `nvm use`. `--lts` is deliberately not used, so a rebuild
+never silently changes the Node a machine runs.
+
 ### PATH precedence
 
 The zsh `initContent` in [`modules/common.nix`](modules/common.nix) initialises
@@ -386,7 +425,12 @@ Read it as three rules:
   stray `npm i -g` binaries land, and `~/.yarn/bin` is the yarn-v1 equivalent, so
   both sit *below* the Nix profile even though `~/.yarn/bin` is a
   `home.sessionPath` entry. nvm still owns Node itself - no
-  `node`/`npm`/`npx`/`corepack` is declared anywhere in this flake.
+  `node`/`npm`/`npx`/`corepack` is declared anywhere in this flake, and nvm
+  itself is installed into `~/.nvm` by
+  [`modules/nvm.nix`](modules/nvm.nix), not put on `PATH` as a package (see
+  [Node and `nvm`](#node-and-nvm)). Sourcing it is the *first* of the four
+  blocks precisely so it ends up here, and `nvm use <v>` keeps working because
+  it rewrites its own `PATH` entry in place rather than re-prepending.
 - **pyenv and Homebrew keep Python.** They stay *above* the Nix profile. The only
   names in both `/opt/homebrew/bin` and the Nix profile are the Python family
   (`python3`, `pydoc3`, `idle3`, `python3-config`), and `pyenv global system`
@@ -531,12 +575,15 @@ modules/
   darwin.nix              macOS-only: homebrew, system.defaults, nix-homebrew
   linux.nix               Linux/WSL-only: nixpkgs brew equivalents, GUI opt-in
   gui.nix                 cross-platform GUI apps (wezterm)
+  nvm.nix                 SHARED: pinned nvm + default LTS Node (activation, not a package)
   agent-tooling/          axi, rtk, caveman, ccusage, codegraph (system-keyed sources)
 files/                    dotfiles symlinked by home-manager (nvim, wezterm, herdr, agent cfg)
 install.sh                POSIX entry point: macOS + Linux + inside-WSL
 install.ps1               Windows: enable WSL2, install distro, hand to install.sh
 lib/prompt.sh             shared prompt/detect helpers
+lib/nvm-bootstrap.sh      the nvm/Node activation step, kept standalone so it can be tested
 tests/install_test.sh     hermetic PATH-masked stub test
+tests/nvm_test.sh         hermetic sandbox test of the nvm/Node activation
 docs/
   NIX_PACKAGES.md         full inventory of what this flake installs, per module
   CROSS_PLATFORM_PLAN.md  the design/build plan this repo was cut from

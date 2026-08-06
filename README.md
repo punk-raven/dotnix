@@ -448,18 +448,18 @@ Read it as three rules:
   revisited.
 - **Four `home.sessionPath` dirs keep their own tools.** `~/.local/bin`,
   `~/.cargo/bin`, `~/.bun/bin` and `~/.maestro/bin` stay above the Nix profile,
-  exactly as home-manager orders them. `~/.local/bin` holds self-updating agent runtimes
-  that are *not* Nix-declared and must win (`claude`, `codex`, `cursor-agent`,
-  `no-mistakes`, `treehouse`) - demoting it would let a stale or missing Nix
-  entry shadow the live runtime, which is worse than the latent shadowing it
-  would prevent. `~/.cargo/bin` and `~/.bun/bin` keep rustup and bun managing
-  their own toolchains, and since `rustup` and `bun` *are* declared in the shared
-  CLI set, that is the second bounded exception to "Nix-declared wins" alongside
-  Python. `~/.maestro/bin` is where Maestro's installer puts its mobile UI test
-  runner; it is a single-tool dir nothing arbitrary can write into, so it
-  carries no shadowing risk - and it has to be declared here because that
-  installer's own PATH step appends to `~/.zshrc`, which home-manager owns as a
-  read-only store symlink, so the append silently no-ops. The other two
+  exactly as home-manager orders them. `~/.local/bin` holds self-updating agent
+  runtimes that are *not* Nix-declared and must win (`claude`, `codex`,
+  `cursor-agent`, `no-mistakes`, `treehouse`) - demoting it would let a stale or
+  missing Nix entry shadow the live runtime, which is worse than the latent
+  shadowing it would prevent. `~/.cargo/bin` and `~/.bun/bin` keep rustup and
+  bun managing their own toolchains, and since `rustup` and `bun` *are* declared
+  in the shared CLI set, that is the second bounded exception to "Nix-declared
+  wins" alongside Python. `~/.maestro/bin` is where Maestro's installer puts its
+  mobile UI test runner; it is a single-tool dir nothing arbitrary can write
+  into, so it carries no shadowing risk - and it has to be declared here because
+  that installer's own PATH step appends to `~/.zshrc`, which home-manager owns
+  as a read-only store symlink, so the append silently no-ops. The other two
   `home.sessionPath` entries - `~/.yarn/bin` and nvm's pinned Node - are
   excluded from this hoist for the reason in the first rule.
 

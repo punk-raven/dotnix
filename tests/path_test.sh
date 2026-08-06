@@ -4,7 +4,7 @@
 # one documented under "PATH precedence" in README.md:
 #
 #   pyenv shims > Homebrew > ~/.local/bin > ~/.cargo/bin > ~/.bun/bin
-#     > Nix profile > nvm > ~/.yarn/bin > system
+#     > ~/.maestro/bin > Nix profile > nvm > ~/.yarn/bin > system
 #
 # That order is now assembled in TWO generated files, not one: .zshenv carries
 # the tail of it (profile > nvm > ~/.yarn/bin) so non-interactive shells can
@@ -98,7 +98,7 @@ done
 
 NVM_PIN_BIN="$SB/.nvm/versions/node/$PIN_NODE/bin"
 NVM_USE_BIN="$SB/.nvm/versions/node/v0.0.0-test/bin"
-mkdir -p "$SB"/{.local/bin,.cargo/bin,.bun/bin,.yarn/bin,.cache/oh-my-zsh,.pyenv/{bin,shims}} \
+mkdir -p "$SB"/{.local/bin,.cargo/bin,.bun/bin,.maestro/bin,.yarn/bin,.cache/oh-my-zsh,.pyenv/{bin,shims}} \
          "$NVM_PIN_BIN" "$NVM_USE_BIN"
 
 # `lavish-axi` is the real historical case (an npm global outranking the pinned
@@ -112,6 +112,14 @@ for d in "$NVM_PIN_BIN" "$NVM_USE_BIN" "$SB/.yarn/bin"; do
   printf '#!/bin/sh\necho %s\n' "$d" > "$d/node"
   chmod +x "$d/node"
 done
+
+# `maestro` is installed into ~/.maestro/bin by its own installer, whose PATH
+# step appends to ~/.zshrc - a read-only store symlink here, so the append
+# no-ops and the binary was invisible until ~/.maestro/bin became a
+# home.sessionPath entry. Nothing else ever plants a `maestro`, so this stub
+# only has to prove the dir is on PATH at all, in both shell shapes.
+printf '#!/bin/sh\necho %s\n' "$SB/.maestro/bin" > "$SB/.maestro/bin/maestro"
+chmod +x "$SB/.maestro/bin/maestro"
 
 # Stub nvm.sh: what real nvm does when sourcing activates a version - strip
 # every $NVM_DIR version bin from PATH, then prepend the selected one. It picks
@@ -176,6 +184,8 @@ CARGO_BIN="$SB/.cargo/bin"
 # shellcheck disable=SC2034  # read indirectly, via ${!name}
 BUN_BIN="$SB/.bun/bin"
 # shellcheck disable=SC2034  # read indirectly, via ${!name}
+MAESTRO_BIN="$SB/.maestro/bin"
+# shellcheck disable=SC2034  # read indirectly, via ${!name}
 YARN_BIN="$SB/.yarn/bin"
 # shellcheck disable=SC2034  # read indirectly, via ${!name}
 PYENV_SHIMS="$SB/.pyenv/shims"
@@ -184,7 +194,7 @@ PYENV_SHIMS="$SB/.pyenv/shims"
 # shellcheck disable=SC2016
 DUMP='print -l ${(s.:.)PATH}'
 # shellcheck disable=SC2016
-WHICH='echo "node=$(command -v node)"; echo "lavish=$(command -v lavish-axi)"'
+WHICH='echo "node=$(command -v node)"; echo "lavish=$(command -v lavish-axi)"; echo "maestro=$(command -v maestro)"'
 
 # --- scenario: a fresh non-interactive shell ----------------------------------
 # The whole point of the .zshenv half: `zsh -c` never reads .zshrc, so before
@@ -195,11 +205,13 @@ scenario_fresh_noninteractive() {
   out=$(zsh_run -c "$WHICH")
 
   assert_order "$path_list" "non-interactive: documented order holds" \
-    LOCAL_BIN CARGO_BIN BUN_BIN PROFILE_BIN NVM_PIN_BIN YARN_BIN
+    LOCAL_BIN CARGO_BIN BUN_BIN MAESTRO_BIN PROFILE_BIN NVM_PIN_BIN YARN_BIN
   assert_resolves "$(sed -n 's/^node=//p' <<<"$out")" "$NVM_PIN_BIN/node" \
     "non-interactive: node resolves to the pinned nvm Node"
   assert_resolves "$(sed -n 's/^lavish=//p' <<<"$out")" "$PROFILE_BIN/lavish-axi" \
     "non-interactive: the Nix profile still beats nvm and ~/.yarn/bin"
+  assert_resolves "$(sed -n 's/^maestro=//p' <<<"$out")" "$MAESTRO_BIN/maestro" \
+    "non-interactive: maestro resolves out of ~/.maestro/bin"
 }
 
 # --- scenario: a fresh interactive shell --------------------------------------
@@ -211,11 +223,13 @@ scenario_fresh_interactive() {
   out=$(zsh_run -ic "$WHICH")
 
   assert_order "$path_list" "interactive: documented order holds" \
-    PYENV_SHIMS LOCAL_BIN CARGO_BIN BUN_BIN PROFILE_BIN NVM_USE_BIN YARN_BIN
+    PYENV_SHIMS LOCAL_BIN CARGO_BIN BUN_BIN MAESTRO_BIN PROFILE_BIN NVM_USE_BIN YARN_BIN
   assert_resolves "$(sed -n 's/^node=//p' <<<"$out")" "$NVM_USE_BIN/node" \
     "interactive: nvm's own selection still owns node"
   assert_resolves "$(sed -n 's/^lavish=//p' <<<"$out")" "$PROFILE_BIN/lavish-axi" \
     "interactive: the Nix profile still beats nvm and ~/.yarn/bin"
+  assert_resolves "$(sed -n 's/^maestro=//p' <<<"$out")" "$MAESTRO_BIN/maestro" \
+    "interactive: maestro resolves out of ~/.maestro/bin"
 }
 
 # --- scenario: a non-interactive child of an interactive shell ----------------
@@ -227,7 +241,7 @@ scenario_nested_noninteractive() {
   path_list=$(zsh_run -ic "zsh -c 'print -l \${(s.:.)PATH}'")
 
   assert_order "$path_list" "nested: parent's assembled order survives" \
-    PYENV_SHIMS LOCAL_BIN CARGO_BIN BUN_BIN PROFILE_BIN NVM_USE_BIN YARN_BIN
+    PYENV_SHIMS LOCAL_BIN CARGO_BIN BUN_BIN MAESTRO_BIN PROFILE_BIN NVM_USE_BIN YARN_BIN
 }
 
 # --- scenario: the same child with the guard defeated -------------------------

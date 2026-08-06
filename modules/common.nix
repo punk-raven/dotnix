@@ -352,7 +352,7 @@ in
       # ends up FIRST on PATH. The resulting order is deliberate:
       #
       #   pyenv shims > Homebrew > ~/.local/bin > ~/.cargo/bin > ~/.bun/bin
-      #     > Nix profile > nvm > ~/.yarn/bin > system
+      #     > ~/.maestro/bin > Nix profile > nvm > ~/.yarn/bin > system
       #
       # Rationale per block is inline below; the short version is that the Nix
       # profile has to outrank nvm (that is where stray `npm i -g` binaries

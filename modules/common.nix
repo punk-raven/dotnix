@@ -112,6 +112,16 @@ in
     "$HOME/.local/bin"    # native Claude Code + other manual/native installs
     "$HOME/.cargo/bin"    # rust / cargo
     "$HOME/.bun/bin"      # bun
+    # Maestro's mobile UI test runner, which its installer drops in this dir.
+    # Not demoted below the profile: `demotedSessionPathDirs` is for
+    # global-install dirs, where an `npm i -g`/`yarn global add` can land a
+    # same-named copy of a CLI this flake pins. This one is owned by a single
+    # installer and holds a single tool, so nothing arbitrary can appear in it
+    # to shadow anything. It is declared here rather than left to Maestro's
+    # installer because that installer appends to `~/.zshrc`, which
+    # home-manager owns and makes a read-only store symlink - the append
+    # silently no-ops and the binary stays invisible.
+    "$HOME/.maestro/bin"
     # The pinned Node from modules/nvm.nix. It is here, and not left to the
     # nvm.sh sourcing in the zsh init below, because that init only runs for
     # INTERACTIVE shells - so `zsh -c 'node ...'`, editor tasks, hooks and cron
@@ -342,7 +352,7 @@ in
       # ends up FIRST on PATH. The resulting order is deliberate:
       #
       #   pyenv shims > Homebrew > ~/.local/bin > ~/.cargo/bin > ~/.bun/bin
-      #     > Nix profile > nvm > ~/.yarn/bin > system
+      #     > ~/.maestro/bin > Nix profile > nvm > ~/.yarn/bin > system
       #
       # Rationale per block is inline below; the short version is that the Nix
       # profile has to outrank nvm (that is where stray `npm i -g` binaries
@@ -391,7 +401,7 @@ in
       #
       # Re-prepending the same dirs, in home-manager's own order, restores the
       # intent: a binary this repo declares beats a stray global install of the
-      # same name. Three `home.sessionPath` dirs are re-prepended ahead of the
+      # same name. Four `home.sessionPath` dirs are re-prepended ahead of the
       # profile, exactly as home-manager orders them, and each is a deliberate
       # exception to "Nix-declared wins":
       #   - `~/.local/bin` holds self-updating agent runtimes that are NOT
@@ -402,6 +412,8 @@ in
       #   - `~/.cargo/bin` and `~/.bun/bin`: rustup and bun manage their own
       #     toolchains out of those dirs, so they keep owning
       #     `cargo`/`rustc`/`rustup` and `bun`/`bunx`.
+      #   - `~/.maestro/bin` holds one installer-managed tool (`maestro`) and
+      #     nothing else can land in it, so it carries no shadowing risk.
       # Neither `~/.yarn/bin` nor nvm's pinned Node dir is an exception - both
       # are global-install dirs, so `demotedSessionPathDirs` above keeps them
       # out of this array and they stay below the profile where home-manager

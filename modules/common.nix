@@ -18,11 +18,32 @@ let
 
   # `rebuild` re-applies the config. The command differs per platform: macOS
   # goes through nix-darwin, Linux/WSL through standalone home-manager.
-  rebuildAlias =
+  rebuildSwitch =
     if pkgs.stdenv.isDarwin then
       "sudo env DOTNIX_CONFIG=${configPath} /run/current-system/sw/bin/darwin-rebuild switch --impure --flake ${dotfilesDir}#${cfg.hostname}"
     else
       "DOTNIX_CONFIG=${configPath} home-manager switch -b backup --impure --flake ${dotfilesDir}#${cfg.username}";
+
+  # PATH, session variables and the generated rc files are all read once at
+  # shell startup, so the shell that RAN the switch keeps the previous
+  # generation's environment - a newly declared package is missing from it until
+  # a fresh shell starts. Re-exec zsh in place so the current shell picks the new
+  # generation up immediately. `exec` keeps the terminal and the working
+  # directory; it does discard shell-local state (unexported variables, defined
+  # functions, background jobs), which is the trade for not having to open a new
+  # tab.
+  #
+  # Chained with `&&`, never `;`: on a failed switch the shell must stay put so
+  # the error is the last thing on screen. Re-execing there would replace the
+  # shell as if nothing had gone wrong.
+  #
+  # Re-exec is safe against the PATH assembly rather than fighting it. The new
+  # shell inherits the exported `__DOTNIX_PATH_ASSEMBLED`, so .zshenv skips its
+  # hoist, and .zshrc then does the full assembly as usual for an interactive
+  # shell. That assembly is idempotent - `''${path:|arr}` drops stale copies
+  # instead of duplicating them - so re-entering it with an already-assembled
+  # PATH reorders rather than grows it.
+  rebuildAlias = "${rebuildSwitch} && exec zsh";
 
   # `home.sessionPath` entries that must NOT be hoisted above the Nix profile.
   # Both are global-install dirs - somewhere `npm i -g` or `yarn global add

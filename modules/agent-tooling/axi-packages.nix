@@ -89,6 +89,14 @@ in
     pnpmHash = "sha256-JoPzk2eaF+lXF+FlC85WIFzhfTfw28UlnWh5p59OY8o=";
   };
 
+  quota-axi = mkAxi {
+    pname = "quota-axi";
+    version = "0.1.19";
+    binPath = "dist/bin/quota-axi.js";
+    srcHash = "sha256-2sE3inYm2rIt+A9jz8/UzSGp7XJ8sGQ4hqaUM3EP/ac=";
+    pnpmHash = "sha256-5r9osgZibmqfjEHExoPLLVXSeebjrn7XWrv8J/FYhwc=";
+  };
+
   chrome-devtools-mcp = let version = "1.5.0"; in pkgs.buildNpmPackage {
     pname = "chrome-devtools-mcp";
     inherit version;

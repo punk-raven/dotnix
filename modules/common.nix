@@ -102,6 +102,7 @@ in
     ./agent-tooling/caveman.nix
     ./agent-tooling/ccusage.nix
     ./agent-tooling/codegraph.nix
+    ./npm-clis
   ];
 
   home.username = cfg.username;

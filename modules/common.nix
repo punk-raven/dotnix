@@ -313,6 +313,12 @@ in
       rebasem = "git rebase -i main";
       rebasemst = "git rebase -i master";
       rebuild = rebuildAlias;
+      # Bump the AXI pins to their latest release and resolve the new hashes.
+      # Rewrites modules/agent-tooling/axi-packages.nix and stops - review the
+      # diff, then `rebuild`. This replaces reaching for `npx skills update`,
+      # which writes into ~/.agents/skills behind the flake's back and breaks
+      # the next activation; see the header of lib/update-axi.sh.
+      update-axi = "bash ${dotfilesDir}/lib/update-axi.sh";
     } // lib.optionalAttrs pkgs.stdenv.isDarwin {
       # On-demand Homebrew upgrade (macOS only). `darwin-rebuild switch` only
       # installs missing declared packages; run this when you actually want to

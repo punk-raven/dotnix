@@ -66,10 +66,10 @@ in
 
   chrome-devtools-axi = mkAxi {
     pname = "chrome-devtools-axi";
-    version = "0.1.26";
+    version = "0.1.29";
     binPath = "dist/bin/chrome-devtools-axi.js";
-    srcHash = "sha256-csjr1T+a9MPNIw4qxk1TIgFUoGjB8jhrZ+oc6ObcDts=";
-    pnpmHash = "sha256-PSFZX2bJr1DBCYBsFm8b4UTubSOZRwDVDCCsj+ma3IU=";
+    srcHash = "sha256-ZiEtrZDvWV4xpIb68R0BE7H86pWuwm9QRV0o9JmAh8I=";
+    pnpmHash = "sha256-MhpAmNmUAB8M0p8AlJpw80iRgWIdvKOjv88XAjFqYaU=";
   };
 
   lavish-axi = mkAxi {
@@ -83,10 +83,10 @@ in
 
   tasks-axi = mkAxi {
     pname = "tasks-axi";
-    version = "0.2.3";
+    version = "0.2.5";
     binPath = "dist/bin/tasks-axi.js";
-    srcHash = "sha256-ziQJdRYtMsJW9xhRtrBiTjDe/5PcECXrBU9Wt9Tn7Vg=";
-    pnpmHash = "sha256-JoPzk2eaF+lXF+FlC85WIFzhfTfw28UlnWh5p59OY8o=";
+    srcHash = "sha256-obwgvKls8GljbUdFrl7ht9+k0AEQjdqvLGf4UHscv+M=";
+    pnpmHash = "sha256-BtnZnvjHsPRchvlsy1vhkTf4+aYlx97Eh6RyjWpKcLg=";
   };
 
   quota-axi = mkAxi {

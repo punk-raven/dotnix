@@ -164,6 +164,12 @@ in
     tree
     bun
     rustup
+    # The circom circuit compiler. Previously a `cargo install --path` from a
+    # local clone of iden3/circom, which left ~/.cargo/bin/circom with no
+    # recorded provenance beyond that directory - move the clone and nothing
+    # says what the binary was built from. nixpkgs carries the identical
+    # version, so declaring it costs nothing and is not a version change.
+    circom
     zip
     unzip
     # Python/dev toolchain. `gnumake` is here because a stock Ubuntu/WSL distro

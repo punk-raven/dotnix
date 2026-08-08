@@ -1,0 +1,145 @@
+{
+  "name": "clerk",
+  "version": "3.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "clerk",
+      "version": "3.0.0",
+      "license": "MIT",
+      "bin": {
+        "clerk": "bin/clerk"
+      },
+      "engines": {
+        "node": ">=20.0.0"
+      },
+      "optionalDependencies": {
+        "@clerk/cli-darwin-arm64": "3.0.0",
+        "@clerk/cli-darwin-x64": "3.0.0",
+        "@clerk/cli-linux-arm64": "3.0.0",
+        "@clerk/cli-linux-arm64-musl": "3.0.0",
+        "@clerk/cli-linux-x64": "3.0.0",
+        "@clerk/cli-linux-x64-musl": "3.0.0",
+        "@clerk/cli-win32-arm64": "3.0.0",
+        "@clerk/cli-win32-x64": "3.0.0"
+      }
+    },
+    "node_modules/@clerk/cli-darwin-arm64": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-darwin-arm64/-/cli-darwin-arm64-3.0.0.tgz",
+      "integrity": "sha512-qrKkJNpA766IeGnWm/kfM8VcUyo0ENfvIoQmrQcATp27DGY2Pe8URpAWP3NAMv9aEslHEtKjujTxQyidHmYL5w==",
+      "cpu": [
+        "arm64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "darwin"
+      ]
+    },
+    "node_modules/@clerk/cli-darwin-x64": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-darwin-x64/-/cli-darwin-x64-3.0.0.tgz",
+      "integrity": "sha512-Nkt1JtCoGpSo4oMInJ5Z6dnGScavG14Tuhnttj8ClnY14Bk1nNe+o9OMpukOxodcPCsY6xy81NtshgCsni5t/w==",
+      "cpu": [
+        "x64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "darwin"
+      ]
+    },
+    "node_modules/@clerk/cli-linux-arm64": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-linux-arm64/-/cli-linux-arm64-3.0.0.tgz",
+      "integrity": "sha512-Iv3CbAIpMUvmPyfXAs3CSoKw8aX0fRiM6y/RotAn1XOpDiMWGd9/facPEJpMDMLvkYfA8zfYdi6t7WxY/4310g==",
+      "cpu": [
+        "arm64"
+      ],
+      "libc": [
+        "glibc"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ]
+    },
+    "node_modules/@clerk/cli-linux-arm64-musl": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-linux-arm64-musl/-/cli-linux-arm64-musl-3.0.0.tgz",
+      "integrity": "sha512-soIm8qWRY4DcgdWxOQ+pYyqqRjgM/0Jynp+uke1xvkpugbRzVX5K7sQ9MIFLQMARRu3jmmhf3aKOS37Bh+1Syg==",
+      "cpu": [
+        "arm64"
+      ],
+      "libc": [
+        "musl"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ]
+    },
+    "node_modules/@clerk/cli-linux-x64": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-linux-x64/-/cli-linux-x64-3.0.0.tgz",
+      "integrity": "sha512-rUoAuvRhA3uvwUkqEeRSBMmw/z5PAFYNz5JQuYAwumqblNVGPzrYuTlpkprn4wOhzf1Xmek6h3DDEjKKkEBspw==",
+      "cpu": [
+        "x64"
+      ],
+      "libc": [
+        "glibc"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ]
+    },
+    "node_modules/@clerk/cli-linux-x64-musl": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-linux-x64-musl/-/cli-linux-x64-musl-3.0.0.tgz",
+      "integrity": "sha512-5VStDgaZxPRRJhCoino03SlnnpS6sjna0/21Si6/gvdUeQpkr9eEZbEx6W12kEwtnzeas4nHJEEy7VOImhdSYw==",
+      "cpu": [
+        "x64"
+      ],
+      "libc": [
+        "musl"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ]
+    },
+    "node_modules/@clerk/cli-win32-arm64": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-win32-arm64/-/cli-win32-arm64-3.0.0.tgz",
+      "integrity": "sha512-RQ3M/hwzHeq8GdOe5LFYPkDDYyXCdQbPwNr9T9NefXEWA5lZP154Pd6bVwDFSQ3E9EpwjKcwqwvjapTq4WSduQ==",
+      "cpu": [
+        "arm64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "win32"
+      ]
+    },
+    "node_modules/@clerk/cli-win32-x64": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-win32-x64/-/cli-win32-x64-3.0.0.tgz",
+      "integrity": "sha512-MnG5BROcmvXUfrJOf3en/kYqSwjWwgIj1fVYBcASiikzXzDZPnDSrDguJiUY0Nxh8xWnuEB5kX706iojMMAZFg==",
+      "cpu": [
+        "x64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "win32"
+      ]
+    }
+  }
+}

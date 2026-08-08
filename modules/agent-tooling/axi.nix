@@ -42,11 +42,17 @@ in
   #      `<cli> setup hooks` - it writes version-pinned /nix/store paths that
   #      break on the next rebuild.
   #
-  # The four CLIs go on PATH. chrome-devtools-mcp is the engine consumed via
+  # The five CLIs go on PATH. chrome-devtools-mcp is the engine consumed via
   # CHROME_DEVTOOLS_AXI_MCP_PATH (below), not a user-facing command, so it is
   # kept off PATH (it ships a generically-named `chrome-devtools` bin); the
   # sessionVariable reference below keeps it in the generation closure.
-  home.packages = [ axi.gh-axi axi.chrome-devtools-axi axi.lavish-axi axi.tasks-axi ];
+  home.packages = [
+    axi.gh-axi
+    axi.chrome-devtools-axi
+    axi.lavish-axi
+    axi.tasks-axi
+    axi.quota-axi
+  ];
 
   home.file = {
     # tier 1: Nix owns the store-backed skill dirs under ~/.agents/skills
@@ -55,6 +61,7 @@ in
       "${axi.chrome-devtools-axi}/lib/chrome-devtools-axi/skills/chrome-devtools-axi";
     ".agents/skills/lavish".source = "${axi.lavish-axi}/lib/lavish-axi/skills/lavish";
     ".agents/skills/tasks-axi".source = "${axi.tasks-axi}/lib/tasks-axi/skills/tasks-axi";
+    ".agents/skills/quota-axi".source = "${axi.quota-axi}/lib/quota-axi/skills/quota-axi";
 
     # tier 2: discovery indirection ~/.claude/skills/<name> -> ~/.agents/skills/<name>
     ".claude/skills/gh-axi".source =
@@ -65,6 +72,8 @@ in
       config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.agents/skills/lavish";
     ".claude/skills/tasks-axi".source =
       config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.agents/skills/tasks-axi";
+    ".claude/skills/quota-axi".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.agents/skills/quota-axi";
   };
 
   home.sessionVariables.CHROME_DEVTOOLS_AXI_MCP_PATH =

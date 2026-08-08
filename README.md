@@ -259,6 +259,15 @@ on every platform - only what it expands to differs:
 Both pass `--impure` so the flake can read your out-of-tree
 `~/.config/dotnix/config.nix`.
 
+On success the alias then runs `exec zsh`, replacing the current shell so it
+picks the new generation up straight away. PATH, session variables and the
+generated rc files are all read once at startup, so without this the shell that
+ran the switch keeps the *previous* generation's environment and a newly
+declared package looks missing until you open a new terminal. `exec` keeps the
+terminal and the working directory, but discards shell-local state - unexported
+variables, functions defined at the prompt, background jobs. It is chained with
+`&&`, so a failed switch leaves the shell alone and the error stays on screen.
+
 The `rebuild` alias only exists in shells started **after** the first successful
 activation. If it is not found yet, either open a new terminal or source the
 Nix profile first, then rebuild:

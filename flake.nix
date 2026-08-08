@@ -83,13 +83,35 @@
             ./modules/darwin.nix
             nix-homebrew.darwinModules.nix-homebrew
             home-manager.darwinModules.home-manager
-            {
+            ({ pkgs, ... }: {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "backup";
+              # A file sitting where the flake declares a symlink aborts
+              # activation unless home-manager is told how to move it aside.
+              #
+              # This was `backupFileExtension = "backup"`, and that is NOT
+              # enough: the extension is a constant, so the SECOND collision on
+              # a path has nowhere to go. home-manager then refuses with
+              # "Existing file '<path>.backup' would be clobbered by backing up
+              # '<path>'" and the whole switch fails - reached for real when
+              # `npx skills update` overwrote the declared ~/.agents/skills
+              # symlinks twice, leaving stale .backup dirs behind from the first
+              # time.
+              #
+              # backupCommand takes the conflicting path as $1 and is free to
+              # pick a unique destination, so repeated collisions cannot
+              # deadlock activation. Timestamped rather than numbered: no
+              # scanning for a free suffix, and the name records when the drift
+              # happened.
+              home-manager.backupCommand = "${pkgs.writeShellScript "hm-backup" ''
+                set -euo pipefail
+                dest="$1.hm-bak-$(date +%Y%m%d-%H%M%S)"
+                mv -- "$1" "$dest"
+                echo "home-manager: moved unmanaged $1 -> $dest" >&2
+              ''}";
               home-manager.extraSpecialArgs = { inherit cfg; };
               home-manager.users.${cfg.username} = import ./modules/common.nix;
-            }
+            })
           ];
         };
       };

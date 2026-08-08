@@ -14,3 +14,12 @@ hooks = true
 [mcp_servers.codegraph]
 command = "codegraph"
 args = ["serve", "--mcp"]
+
+[marketplaces.sentry-plugin-marketplace]
+last_updated = "2026-08-06T15:05:27Z"
+last_revision = "b65e58bb75ffb1e5ff9955ab8ea4743887873fbb"
+source_type = "git"
+source = "https://github.com/getsentry/plugin-codex.git"
+
+[plugins."sentry@sentry-plugin-marketplace"]
+enabled = true

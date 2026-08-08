@@ -58,35 +58,43 @@ in
 {
   gh-axi = mkAxi {
     pname = "gh-axi";
-    version = "0.1.25";
+    version = "0.1.30";
     binPath = "dist/bin/gh-axi.js";
-    srcHash = "sha256-ZTgNscokGpJdo4ATgYHKRtZJ35vkvym80s5Ve1SIdzs=";
-    pnpmHash = "sha256-MwXUdWOEW2e/xO+V/JiRM+84RLpnhdHaEGNdJqZ8Llk=";
+    srcHash = "sha256-E9SahmNcpY2a1Uy5CqLe3A5BIv1ecO/xZtZd6zGpv5c=";
+    pnpmHash = "sha256-2vlp9u0I8gb5/VGEQwS9Z57/wOMzV+YW6U+/JL482d0=";
   };
 
   chrome-devtools-axi = mkAxi {
     pname = "chrome-devtools-axi";
-    version = "0.1.26";
+    version = "0.1.29";
     binPath = "dist/bin/chrome-devtools-axi.js";
-    srcHash = "sha256-csjr1T+a9MPNIw4qxk1TIgFUoGjB8jhrZ+oc6ObcDts=";
-    pnpmHash = "sha256-PSFZX2bJr1DBCYBsFm8b4UTubSOZRwDVDCCsj+ma3IU=";
+    srcHash = "sha256-ZiEtrZDvWV4xpIb68R0BE7H86pWuwm9QRV0o9JmAh8I=";
+    pnpmHash = "sha256-MhpAmNmUAB8M0p8AlJpw80iRgWIdvKOjv88XAjFqYaU=";
   };
 
   lavish-axi = mkAxi {
     pname = "lavish-axi";
-    version = "0.1.36";
+    version = "0.1.46";
     binPath = "dist/cli.mjs";
     # lavish's `pnpm build` = node scripts/build.js (mkAxi's default buildScript runs it)
-    srcHash = "sha256-VKI2MUgFvEqh58RRqquFH7tyi4TkkEDfzHeZ6JWgXMw=";
-    pnpmHash = "sha256-GrNDegz0sUEAS3JsOZs1pcF1nBg/e6ELJwsQOsHce3I=";
+    srcHash = "sha256-TqZUe+55a02+ov08X9ZEoFIIzhSfBaNM/SmJVsS7ydk=";
+    pnpmHash = "sha256-y4KeFqPF02TBSlP1mgyj5UFx0Q98ip890xYkBAYF4qY=";
   };
 
   tasks-axi = mkAxi {
     pname = "tasks-axi";
-    version = "0.2.3";
+    version = "0.2.5";
     binPath = "dist/bin/tasks-axi.js";
-    srcHash = "sha256-ziQJdRYtMsJW9xhRtrBiTjDe/5PcECXrBU9Wt9Tn7Vg=";
-    pnpmHash = "sha256-JoPzk2eaF+lXF+FlC85WIFzhfTfw28UlnWh5p59OY8o=";
+    srcHash = "sha256-obwgvKls8GljbUdFrl7ht9+k0AEQjdqvLGf4UHscv+M=";
+    pnpmHash = "sha256-BtnZnvjHsPRchvlsy1vhkTf4+aYlx97Eh6RyjWpKcLg=";
+  };
+
+  quota-axi = mkAxi {
+    pname = "quota-axi";
+    version = "0.1.19";
+    binPath = "dist/bin/quota-axi.js";
+    srcHash = "sha256-2sE3inYm2rIt+A9jz8/UzSGp7XJ8sGQ4hqaUM3EP/ac=";
+    pnpmHash = "sha256-5r9osgZibmqfjEHExoPLLVXSeebjrn7XWrv8J/FYhwc=";
   };
 
   chrome-devtools-mcp = let version = "1.5.0"; in pkgs.buildNpmPackage {

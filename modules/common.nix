@@ -102,6 +102,7 @@ in
     ./agent-tooling/caveman.nix
     ./agent-tooling/ccusage.nix
     ./agent-tooling/codegraph.nix
+    ./agent-tooling/release-bins.nix
     ./npm-clis
   ];
 

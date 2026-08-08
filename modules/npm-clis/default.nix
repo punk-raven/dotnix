@@ -15,5 +15,12 @@ let
   npmClis = import ./npm-packages.nix { inherit pkgs; };
 in
 {
-  home.packages = [ npmClis.vercel ];
+  home.packages = [
+    npmClis.vercel
+    npmClis.playwright-cli
+    npmClis.tanstack-cli
+    npmClis.clerk
+    npmClis.ruflo
+    npmClis.gnhf
+  ];
 }

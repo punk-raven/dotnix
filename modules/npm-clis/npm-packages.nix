@@ -33,9 +33,15 @@ let
   # revision does not.
   nodejs = pkgs.nodejs_22;
 
+  # `npmName` is the registry name, `pname` the Nix-safe attribute name. They
+  # differ for scoped packages: "@playwright/cli" is not a usable pname, and its
+  # tarball lives at <scope>/<name>/-/<name>-<version>.tgz - the scope appears in
+  # the path but NOT in the filename.
   mkNpmCli =
-    { pname, version, tarballHash, npmDepsHash, lock }:
+    { pname, version, tarballHash, npmDepsHash, lock, npmName ? pname }:
     let
+      tarballName = builtins.baseNameOf npmName;
+
       # The registry tarball plus the vendored lock, with devDependencies and
       # scripts stripped so `npm ci` sees exactly the tree the lock describes.
       src = pkgs.stdenvNoCC.mkDerivation {
@@ -43,7 +49,7 @@ let
         inherit version;
 
         src = pkgs.fetchurl {
-          url = "https://registry.npmjs.org/${pname}/-/${pname}-${version}.tgz";
+          url = "https://registry.npmjs.org/${npmName}/-/${tarballName}-${version}.tgz";
           hash = tarballHash;
         };
 
@@ -77,5 +83,52 @@ in
     tarballHash = "sha256-JNLDs9ITyXr63dqbksm9NHhtu0fPL1W8fXY50yan1CQ=";
     npmDepsHash = "sha256-6I6zcs3SKhwi7wZM6UQwDT8AhUTCqfM7WxMfAB0Gb6U=";
     lock = ./locks/vercel-58.4.4.json;
+  };
+
+  # The rest were plain `npm i -g` globals living in the nvm-managed Node
+  # prefix, which a `nodeVersion` bump in modules/nvm.nix would have orphaned.
+  # Pinned at the versions that were installed rather than at latest - this is a
+  # move into Nix, not an upgrade. None hit vercel's private-devDependency
+  # problem; all five locked from the public registry on the first try.
+  playwright-cli = mkNpmCli {
+    pname = "playwright-cli";
+    npmName = "@playwright/cli";
+    version = "0.1.18";
+    tarballHash = "sha256-2EcZAADjozKKF6txpSzKyAYvslJcDwx4t4mv8cyas3w=";
+    npmDepsHash = "sha256-U06lWt5+3MP34T7uJWaGO7njlHDiJD+vhDzxzrSRJSw=";
+    lock = ./locks/playwright-cli-0.1.18.json;
+  };
+
+  tanstack-cli = mkNpmCli {
+    pname = "tanstack-cli";
+    npmName = "@tanstack/cli";
+    version = "0.70.1";
+    tarballHash = "sha256-73/msiOyuUkSISmG7R7fb+v8eA+6Ow4lFVbdj38KZBo=";
+    npmDepsHash = "sha256-itt69s9nJY6PFLz/W1uaRt5qX4BHtSa/m63+H8PtM60=";
+    lock = ./locks/tanstack-cli-0.70.1.json;
+  };
+
+  clerk = mkNpmCli {
+    pname = "clerk";
+    version = "3.0.0";
+    tarballHash = "sha256-V34m+hGU8pWu0Rpw/6TlM5cuYP3kGbzpjqGSG4oP/DA=";
+    npmDepsHash = "sha256-DoIWnvRyXINM849PQjcFrSZCIG8NVJdBRLczX2rZs7I=";
+    lock = ./locks/clerk-3.0.0.json;
+  };
+
+  ruflo = mkNpmCli {
+    pname = "ruflo";
+    version = "3.34.0";
+    tarballHash = "sha256-8UGBTdFyRU/Ssl1gb2A6De1hPwRPL18YwQVQMkgNPq8=";
+    npmDepsHash = "sha256-tlwK8KzFCKkmoNlxPMBlLse2USwNd+rv/ZHQBvEzDF8=";
+    lock = ./locks/ruflo-3.34.0.json;
+  };
+
+  gnhf = mkNpmCli {
+    pname = "gnhf";
+    version = "0.1.41";
+    tarballHash = "sha256-LrohL6wV3TboFHzmyt4xnW0y8IE+dvGqdFx35AcuAm8=";
+    npmDepsHash = "sha256-Hmwc6HD4zLEli0G1jjQ/7UARJQ22drEBNi/Gv2apvHw=";
+    lock = ./locks/gnhf-0.1.41.json;
   };
 }

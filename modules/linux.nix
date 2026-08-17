@@ -30,6 +30,10 @@
     gh
     watchman
     act
+    # `awscli` in Homebrew is AWS CLI v2; the nixpkgs attribute for v2 is
+    # `awscli2` (plain `awscli` there is the unmaintained v1), so the two names
+    # differ while the tool does not.
+    awscli2
     opentofu
     ktlint
     autoconf

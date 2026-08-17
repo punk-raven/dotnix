@@ -41,6 +41,9 @@
       "herdr"
       # dev tooling
       "act"
+      # AWS CLI v2. Homebrew ships the vendored single-binary distribution AWS
+      # itself supports, and `brew upgrade` tracks upstream releases directly.
+      "awscli"
       "bear"
       "cf-terraforming"
       "cocoapods"

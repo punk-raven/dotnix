@@ -66,9 +66,9 @@ own binaries from the same pinned versions.
 **Taps:** `mongodb/brew`, `chattymin/tap`
 
 **Brews:**
-`autoconf`, `herdr`, `act`, `bear`, `cf-terraforming`, `cocoapods`, `direnv`,
-`ffmpeg`, `gh`, `git-filter-repo`, `ktlint`, `mongodb-database-tools`,
-`opentofu`, `pinentry-mac`, `pyenv`, `watchman`
+`autoconf`, `herdr`, `act`, `awscli`, `bear`, `cf-terraforming`, `cocoapods`,
+`direnv`, `ffmpeg`, `gh`, `git-filter-repo`, `ktlint`,
+`mongodb-database-tools`, `opentofu`, `pinentry-mac`, `pyenv`, `watchman`
 
 **Casks:**
 `wezterm`, `amethyst`, `docker-desktop`, `opensuperwhisper`,
@@ -77,9 +77,13 @@ own binaries from the same pinned versions.
 ## Linux / WSL equivalents (`modules/linux.nix`)
 
 nixpkgs versions of the portable brews above:
-`ffmpeg`, `direnv`, `gh`, `watchman`, `act`, `opentofu`, `ktlint`, `autoconf`,
-`bear`, `cf-terraforming`, `git-filter-repo`, `mongodb-tools`, `pyenv`,
-`zulu17`, `pinentry-curses`, plus `herdr` from its own flake.
+`ffmpeg`, `direnv`, `gh`, `watchman`, `act`, `awscli2`, `opentofu`, `ktlint`,
+`autoconf`, `bear`, `cf-terraforming`, `git-filter-repo`, `mongodb-tools`,
+`pyenv`, `zulu17`, `pinentry-curses`, plus `herdr` from its own flake.
+
+Homebrew's `awscli` is AWS CLI v2; the nixpkgs attribute for v2 is `awscli2`
+(plain `awscli` in nixpkgs is the unmaintained v1), so only the attribute name
+differs between the two surfaces.
 
 **Linux-only additions** - these have no brew counterpart because macOS gets the
 same capability from the OS:

@@ -29,6 +29,8 @@
     # package you want to keep.
     taps = [
       "mongodb/brew"
+      # Home of the poke-token-bar cask below.
+      "chattymin/tap"
     ];
     # With cleanup = "zap", every Homebrew package must be declared here or it
     # gets uninstalled on the next switch. macOS-only tools (cocoapods,
@@ -76,6 +78,11 @@
       # pass an option brew rejects, failing the switch.
       "docker-desktop"
       "opensuperwhisper"
+      # Menu-bar token tracker (macOS 14+). Ships only as a cask from its own
+      # tap - no nixpkgs derivation and no Linux build - so it stays here rather
+      # than in the shared package set. Fully qualified because the cask name
+      # alone would resolve against homebrew/cask first.
+      "chattymin/tap/poke-token-bar"
       "zulu@17"
     ];
   };

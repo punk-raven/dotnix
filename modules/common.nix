@@ -118,6 +118,7 @@ in
 {
   imports = [
     ./nvm.nix
+    ./floci.nix
     ./agent-tooling/axi.nix
     ./agent-tooling/rtk.nix
     ./agent-tooling/caveman.nix

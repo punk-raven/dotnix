@@ -38,6 +38,12 @@ Bumping `nodeVersion` installs the new Node and moves `nvm alias default` to it,
 but only while that alias is still the one the previous activation wrote - a
 default you set yourself is never overwritten.
 
+## Local cloud emulator (`modules/floci.nix`)
+
+| Item | Pinned in | Notes |
+|------|-----------|-------|
+| `floci` | `version` + one SRI hash per system | Official prebuilt GraalVM native image, one bare binary per platform. Needs a Docker-compatible daemon, already supplied by `docker-desktop` (macOS) / `docker-client` (Linux). `floci update` is inert against the read-only store - bump the flake instead. |
+
 ## nix-darwin `environment.systemPackages` (`modules/darwin.nix`)
 
 `starship`
@@ -57,7 +63,7 @@ own binaries from the same pinned versions.
 
 ## Homebrew - macOS only (`modules/darwin.nix`, zap-cleaned)
 
-**Tap:** `mongodb/brew`
+**Taps:** `mongodb/brew`, `chattymin/tap`
 
 **Brews:**
 `autoconf`, `herdr`, `act`, `bear`, `cf-terraforming`, `cocoapods`, `direnv`,
@@ -65,7 +71,8 @@ own binaries from the same pinned versions.
 `opentofu`, `pinentry-mac`, `pyenv`, `watchman`
 
 **Casks:**
-`wezterm`, `amethyst`, `docker-desktop`, `opensuperwhisper`, `zulu@17`
+`wezterm`, `amethyst`, `docker-desktop`, `opensuperwhisper`,
+`chattymin/tap/poke-token-bar`, `zulu@17`
 
 ## Linux / WSL equivalents (`modules/linux.nix`)
 

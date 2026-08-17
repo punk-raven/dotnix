@@ -66,11 +66,14 @@ Two traps worth knowing before you touch them:
 
 ## Agent-tooling version bumps
 
-The prebuilt tools (`rtk`, `ccusage`, `codegraph`) carry a per-`system` source
-selector with an SRI hash for each platform. Bump the version, set the changed
-hashes to `pkgs.lib.fakeHash`, rebuild to surface the real hashes, paste back.
-Grab a hash directly with `nix store prefetch-file --json <url>`. Keep all four
-platform hashes in sync (aarch64/x86_64 × darwin/linux).
+The prebuilt tools (`rtk`, `ccusage`, `codegraph`, and `floci` in
+`modules/floci.nix`) carry a per-`system` source selector with an SRI hash for
+each platform. Bump the version, set the changed hashes to `pkgs.lib.fakeHash`,
+rebuild to surface the real hashes, paste back. Grab a hash directly with `nix
+store prefetch-file --json <url>`, or - when upstream publishes per-asset
+digests, as floci does - convert them with `nix hash convert --hash-algo sha256
+--to sri <hex>` and skip the download. Keep all four platform hashes in sync
+(aarch64/x86_64 × darwin/linux).
 
 ## The zsh PATH assembly is load-bearing, and spans two files
 

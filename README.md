@@ -23,7 +23,7 @@ per-user values instead of hardcoding them.
 - [Prerequisites](#prerequisites) - [macOS](#-macos) · [Linux](#-linux) · [Windows](#-windows-wsl2)
 - [Install](#install)
 - [How `config.nix` is generated](#how-confignix-is-generated)
-- [What you get](#what-you-get) - [Node and `nvm`](#node-and-nvm) · [PATH precedence](#path-precedence) · [GPG signing](#gpg-signing)
+- [What you get](#what-you-get) - [Node and `nvm`](#node-and-nvm) · [Floci](#floci) · [PATH precedence](#path-precedence) · [GPG signing](#gpg-signing)
 - [Flake inputs](#flake-inputs)
 - [Repository layout](#repository-layout)
 - [License](#license) · [Contributing](#contributing)
@@ -349,6 +349,10 @@ installer already do this for you).
   pinned and reproducible, with the Linux/Intel release artifacts selected
   automatically by `system`. The pinned build is also the one that *runs*: see
   [PATH precedence](#path-precedence) for why that needs saying.
+- **Local cloud emulator** (all platforms): `floci`, the CLI for
+  [Floci](https://github.com/floci-io/floci-cli) - see
+  [Floci](#floci) for the Docker prerequisite and why `floci update` is a no-op
+  here.
 - **macOS extras**: Homebrew brews/casks (with `zap` cleanup) and
   `system.defaults` in [`modules/darwin.nix`](modules/darwin.nix).
 - **Linux extras**: nixpkgs equivalents of the portable brews + optional desktop
@@ -419,6 +423,36 @@ installs the new Node and re-points `nvm alias default` at it - unless you have
 picked your own default since, in which case yours wins and the new Node is
 merely available to `nvm use`. `--lts` is deliberately not used, so a rebuild
 never silently changes the Node a machine runs.
+
+### Floci
+
+[`modules/floci.nix`](modules/floci.nix) pins `floci`, the CLI for
+[Floci](https://github.com/floci-io/floci-cli) - an open-source local emulator
+for AWS, GCP, Azure and OCI. The usual loop is `floci start`, then
+`eval $(floci env)`, after which the normal `aws` / `gcloud` / `az` / `oci` CLIs
+talk to the local emulator instead of a real account.
+
+Two things worth knowing:
+
+- **It needs a Docker-compatible daemon.** That is already covered on both
+  surfaces - the `docker-desktop` cask in
+  [`modules/darwin.nix`](modules/darwin.nix) and `docker-client` in
+  [`modules/linux.nix`](modules/linux.nix), whose daemon lives on the Windows
+  side under WSL2. Non-default daemons (Podman, rootless, remote contexts) work
+  through the standard `DOCKER_HOST` variable.
+- **`floci update` cannot update anything here.** It self-updates by
+  overwriting its own binary, and that binary is a read-only `/nix/store` path.
+  The version is pinned in the flake: bump `version` and the four SRI hashes in
+  [`modules/floci.nix`](modules/floci.nix), then `rebuild`. Upstream publishes a
+  `sha256sums.txt` with every release, so the hashes come from
+  `nix hash convert --hash-algo sha256 --to sri <hex>` without downloading a
+  single 50 MB asset.
+
+The Linux assets are dynamically linked against the host's glibc, so they are
+run through `autoPatchelfHook` and re-pointed at this nixpkgs' glibc and zlib -
+the closure stays self-contained rather than depending on what the distro
+ships. The Darwin assets are adhoc-signed and skip fixup entirely, for the same
+reason [`modules/agent-tooling/rtk.nix`](modules/agent-tooling/rtk.nix) does.
 
 ### PATH precedence
 
@@ -637,6 +671,7 @@ modules/
   linux.nix               Linux/WSL-only: nixpkgs brew equivalents, GUI opt-in
   gui.nix                 cross-platform GUI apps (wezterm)
   nvm.nix                 SHARED: pinned nvm + default LTS Node (activation, not a package)
+  floci.nix               SHARED: pinned floci CLI (local AWS/GCP/Azure/OCI emulator)
   agent-tooling/          axi, rtk, caveman, ccusage, codegraph (system-keyed sources)
 files/                    dotfiles symlinked by home-manager (nvim, wezterm, herdr, agent cfg)
 install.sh                POSIX entry point: macOS + Linux + inside-WSL

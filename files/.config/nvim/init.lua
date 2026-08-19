@@ -1,5 +1,5 @@
 -- ============================================================================
--- Vim options (adopted from raveracker/dotfiles: lua/vim_config.lua)
+-- Vim options (adopted from punkadillo/dotfiles: lua/vim_config.lua)
 -- Leader MUST be set before any <leader> mapping is defined below.
 -- ============================================================================
 local o = vim.opt
@@ -52,22 +52,22 @@ vim.pack.add({ "https://github.com/NeogitOrg/neogit" })
 require("neogit").setup({})
 vim.keymap.set("n", "<leader>gg", "<cmd>Neogit<cr>", { desc = "Open Neogit" })
 
--- 5. diffview.nvim - side-by-side git diff / file history. (NEW, from raveracker)
+-- 5. diffview.nvim - side-by-side git diff / file history. (NEW, from punkadillo)
 vim.pack.add({ "https://github.com/sindrets/diffview.nvim" })
 require("diffview").setup()
 vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<cr>",        { desc = "Diffview: open" })
 vim.keymap.set("n", "<leader>gh", "<cmd>DiffviewFileHistory<cr>", { desc = "Diffview: file history" })
 
--- 6. gitsigns.nvim - git gutter signs + current-line blame. (NEW, from raveracker)
+-- 6. gitsigns.nvim - git gutter signs + current-line blame. (NEW, from punkadillo)
 vim.pack.add({ "https://github.com/lewis6991/gitsigns.nvim" })
 require("gitsigns").setup({ current_line_blame = true })
 
--- 7. which-key.nvim - popup of available <leader> mappings. (NEW, from raveracker)
+-- 7. which-key.nvim - popup of available <leader> mappings. (NEW, from punkadillo)
 vim.pack.add({ "https://github.com/folke/which-key.nvim" })
 require("which-key").setup({})
 
 -- ============================================================================
--- Keymaps (adopted from raveracker/dotfiles: lua/keys.lua)
+-- Keymaps (adopted from punkadillo/dotfiles: lua/keys.lua)
 -- ============================================================================
 vim.keymap.set("n", "<Esc>", ":w<CR>", { desc = "Save" })
 vim.keymap.set("n", "<C-a>", "ggVG",   { desc = "Select all" })

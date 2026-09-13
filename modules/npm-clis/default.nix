@@ -20,7 +20,6 @@ in
     npmClis.playwright-cli
     npmClis.tanstack-cli
     npmClis.clerk
-    npmClis.ruflo
     npmClis.gnhf
   ];
 }

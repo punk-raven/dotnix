@@ -111,13 +111,6 @@ in
     lock = ./locks/clerk-3.3.0.json;
   };
 
-  ruflo = mkNpmCli {
-    pname = "ruflo";
-    version = "3.41.2";
-    tarballHash = "sha256-GALYeEfFsDBwPYEwrmjRlXaX+NeDwIfW8rgZ9Lpjjnk=";
-    npmDepsHash = "sha256-i+pQMZ02vSC4PuL1GVS5cdRzrgZrqCKZarzx9wIqtgY=";
-    lock = ./locks/ruflo-3.41.2.json;
-  };
 
   gnhf = mkNpmCli {
     pname = "gnhf";

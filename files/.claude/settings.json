@@ -31,17 +31,6 @@
         ]
       }
     ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "rtk hook claude"
-          }
-        ]
-      }
-    ],
     "SessionStart": [
       {
         "matcher": "",
@@ -84,33 +73,11 @@
         ]
       },
       {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "caveman-activate",
-            "timeout": 10
-          }
-        ]
-      },
-      {
         "matcher": "*",
         "hooks": [
           {
             "type": "command",
             "command": "bash '/Users/allan/.claude/hooks/herdr-agent-state.sh' session",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "caveman-mode-tracker",
             "timeout": 10
           }
         ]
@@ -126,6 +93,7 @@
     "sentry@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {},
+  "model": "claude-opus-4-6[1m]",
   "theme": "dark-daltonized",
   "skipDangerousModePermissionPrompt": true
 }

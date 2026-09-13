@@ -345,8 +345,8 @@ installer already do this for you).
 - **Node** (all platforms): `nvm` plus a pinned default LTS Node, installed on
   the first activation - see [Node and `nvm`](#node-and-nvm).
 - **Agent tooling** (all platforms): `gh-axi`, `chrome-devtools-axi`,
-  `lavish-axi`, `tasks-axi`, `rtk`, `ccusage`, `codegraph`, and caveman - each
-  pinned and reproducible, with the Linux/Intel release artifacts selected
+  `lavish-axi`, `tasks-axi`, `ccusage`, `codegraph` - each pinned and
+  reproducible, with the Linux/Intel release artifacts selected
   automatically by `system`. The pinned build is also the one that *runs*: see
   [PATH precedence](#path-precedence) for why that needs saying.
 - **Local cloud emulator** (all platforms): `floci`, the CLI for
@@ -371,10 +371,7 @@ installer already do this for you).
 > what uv actually resolves. pyenv stays for everything outside such a project.
 >
 > No interpreter is declared in `modules/common.nix` itself for the same reason:
-> another python on `PATH` would only add a candidate to that race. One does
-> arrive indirectly - `modules/agent-tooling/caveman.nix` declares `pkgs.python3`
-> because the caveman-compress skill ships Python scripts - and the `PATH`
-> ordering below is arranged so it never displaces pyenv or the system python.
+> another python on `PATH` would only add a candidate to that race.
 
 ### Node and `nvm`
 
@@ -451,8 +448,8 @@ Two things worth knowing:
 The Linux assets are dynamically linked against the host's glibc, so they are
 run through `autoPatchelfHook` and re-pointed at this nixpkgs' glibc and zlib -
 the closure stays self-contained rather than depending on what the distro
-ships. The Darwin assets are adhoc-signed and skip fixup entirely, for the same
-reason [`modules/agent-tooling/rtk.nix`](modules/agent-tooling/rtk.nix) does.
+ships. The Darwin assets are adhoc-signed and skip fixup entirely so the
+signature is not invalidated.
 
 ### PATH precedence
 
@@ -672,7 +669,7 @@ modules/
   gui.nix                 cross-platform GUI apps (wezterm)
   nvm.nix                 SHARED: pinned nvm + default LTS Node (activation, not a package)
   floci.nix               SHARED: pinned floci CLI (local AWS/GCP/Azure/OCI emulator)
-  agent-tooling/          axi, rtk, caveman, ccusage, codegraph (system-keyed sources)
+  agent-tooling/          axi, ccusage, codegraph (system-keyed sources)
 files/                    dotfiles symlinked by home-manager (nvim, wezterm, herdr, agent cfg)
 install.sh                POSIX entry point: macOS + Linux + inside-WSL
 install.ps1               Windows: enable WSL2, install distro, hand to install.sh

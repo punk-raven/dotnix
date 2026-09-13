@@ -58,27 +58,27 @@ in
 {
   gh-axi = mkAxi {
     pname = "gh-axi";
-    version = "0.1.30";
+    version = "0.1.35";
     binPath = "dist/bin/gh-axi.js";
-    srcHash = "sha256-E9SahmNcpY2a1Uy5CqLe3A5BIv1ecO/xZtZd6zGpv5c=";
-    pnpmHash = "sha256-2vlp9u0I8gb5/VGEQwS9Z57/wOMzV+YW6U+/JL482d0=";
+    srcHash = "sha256-zuShaNLCh+u5c+CTeX5cgMCk1PUTK8nd7D5zTjTqt9E=";
+    pnpmHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   };
 
   chrome-devtools-axi = mkAxi {
     pname = "chrome-devtools-axi";
-    version = "0.1.29";
+    version = "0.1.34";
     binPath = "dist/bin/chrome-devtools-axi.js";
-    srcHash = "sha256-ZiEtrZDvWV4xpIb68R0BE7H86pWuwm9QRV0o9JmAh8I=";
-    pnpmHash = "sha256-MhpAmNmUAB8M0p8AlJpw80iRgWIdvKOjv88XAjFqYaU=";
+    srcHash = "sha256-Lv4e2OLXpO3aCZ/08ju3WZjeEtG9TicBNcpGnCfwkDw=";
+    pnpmHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   };
 
   lavish-axi = mkAxi {
     pname = "lavish-axi";
-    version = "0.1.46";
+    version = "0.1.67";
     binPath = "dist/cli.mjs";
     # lavish's `pnpm build` = node scripts/build.js (mkAxi's default buildScript runs it)
-    srcHash = "sha256-TqZUe+55a02+ov08X9ZEoFIIzhSfBaNM/SmJVsS7ydk=";
-    pnpmHash = "sha256-y4KeFqPF02TBSlP1mgyj5UFx0Q98ip890xYkBAYF4qY=";
+    srcHash = "sha256-IVB37AuN7vKW+RXHIlny+aBQOPTe0BhHP/pHMDIOPpQ=";
+    pnpmHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   };
 
   tasks-axi = mkAxi {
@@ -91,13 +91,13 @@ in
 
   quota-axi = mkAxi {
     pname = "quota-axi";
-    version = "0.1.19";
+    version = "0.1.42";
     binPath = "dist/bin/quota-axi.js";
-    srcHash = "sha256-2sE3inYm2rIt+A9jz8/UzSGp7XJ8sGQ4hqaUM3EP/ac=";
-    pnpmHash = "sha256-5r9osgZibmqfjEHExoPLLVXSeebjrn7XWrv8J/FYhwc=";
+    srcHash = "sha256-xT9p81N6LD8KtIBSM2Alnlra42Tuv339tCxj24qnNfw=";
+    pnpmHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   };
 
-  chrome-devtools-mcp = let version = "1.5.0"; in pkgs.buildNpmPackage {
+  chrome-devtools-mcp = let version = "1.9.0"; in pkgs.buildNpmPackage {
     pname = "chrome-devtools-mcp";
     inherit version;
     # Task 2 established that pinned pkgs.nodejs (24.x) SIGKILLs under real
@@ -107,9 +107,9 @@ in
       owner = "ChromeDevTools";
       repo = "chrome-devtools-mcp";
       rev = "chrome-devtools-mcp-v${version}";
-      hash = "sha256-qDji1ZA46H3+jEZ5SL7ga/pyRhJ9SAdBWYH1jKC/TVg=";
+      hash = "sha256-g93keCVu5drnirmWV/ugRpcNirunTMAPRU4/pKQ36aE=";
     };
-    npmDepsHash = "sha256-t9PwLvjcUaGFBZpW504+V96TbEVukOp3skomtTFs8cA=";
+    npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     # The default `npmBuildScript` ("build" = `tsc && node scripts/post-build.ts`)
     # only type-checks/transpiles; the resulting build/src/*.js still `import`s
     # devDependencies (e.g. urlpattern-polyfill) straight from node_modules,

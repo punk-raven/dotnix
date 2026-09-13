@@ -1,7 +1,7 @@
 { pkgs, lib, ... }:
 
 let
-  version = "0.2.0";
+  version = "0.2.1";
 
   # floci (https://github.com/floci-io/floci-cli): the CLI for Floci, an
   # open-source local cloud emulator for AWS, GCP, Azure and OCI. It drives a
@@ -35,10 +35,10 @@ let
   #   curl -sL https://github.com/floci-io/floci-cli/releases/download/<VER>/sha256sums.txt
   #   nix hash convert --hash-algo sha256 --to sri <hex>
   sources = {
-    "aarch64-darwin" = { asset = "floci-darwin-arm64"; hash = "sha256-b987LyXanLkoehAGmhkTS7M7Inyk7F1/Ln5yTn9vTsg="; };
-    "x86_64-darwin"  = { asset = "floci-darwin-amd64"; hash = "sha256-QnxNPxz4T/M4ctwGE5vfBTzJe40ecuVMDEyzfyulAAg="; };
-    "aarch64-linux"  = { asset = "floci-linux-arm64"; hash = "sha256-HD+JiFz4DmnDOKuvr+nB/amOwp1JvVkcJ67CD6++rT4="; };
-    "x86_64-linux"   = { asset = "floci-linux-amd64"; hash = "sha256-akWyP3s6n66SFOECgZDFY5jfrzW9/T/iwkxnNb6EGTM="; };
+    "aarch64-darwin" = { asset = "floci-darwin-arm64"; hash = "sha256-uZjd7Ku+MrXh1/Ro/2+7FS/FrPr8YIzECE6Jk3D7pbk="; };
+    "x86_64-darwin"  = { asset = "floci-darwin-amd64"; hash = "sha256-H8RG5fLpobJ93YfKLt88vwHVYwHl9odvyyUm+zIWQfY="; };
+    "aarch64-linux"  = { asset = "floci-linux-arm64"; hash = "sha256-QGWKAhsd5zxMN5qWJNzzuJ1YDC5t1OJrjne7whIBjII="; };
+    "x86_64-linux"   = { asset = "floci-linux-amd64"; hash = "sha256-3lgy6s0J9FdvxKlqOPUXZyuFM0mUuv0XPPF65rJwH4Y="; };
   };
   source = sources.${pkgs.stdenv.hostPlatform.system};
 
@@ -64,7 +64,7 @@ let
     #
     # On Darwin fixup is skipped entirely - the release binaries are
     # adhoc/linker-signed, and stripping them invalidates the signature so they
-    # refuse to launch. Same reason modules/agent-tooling/rtk.nix sets it.
+    # refuse to launch.
     nativeBuildInputs = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.autoPatchelfHook ];
     buildInputs = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.zlib pkgs.stdenv.cc.cc.lib ];
     dontFixup = pkgs.stdenv.hostPlatform.isDarwin;

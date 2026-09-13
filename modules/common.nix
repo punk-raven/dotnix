@@ -193,6 +193,7 @@ in
     circom
     zip
     unzip
+    go
     # Python/dev toolchain. `gnumake` is here because a stock Ubuntu/WSL distro
     # ships no `make` at all, while macOS gets 3.81 from the Xcode CLT that
     # install.sh already triggers - declaring it keeps both platforms equal.

@@ -81,7 +81,7 @@ in
     pname = "vercel";
     version = "59.16.0";
     tarballHash = "sha256-WEl7g9pY8Sci2NW75M1rOWW5GFB4meRZ/upK9KVxd3E=";
-    npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    npmDepsHash = "sha256-Pa6U0FPw+xOZRWaiuE8KU8WrSGKqWmJeYoshPhZ1b2s=";
     lock = ./locks/vercel-59.16.0.json;
   };
 
@@ -90,7 +90,7 @@ in
     npmName = "@playwright/cli";
     version = "0.1.19";
     tarballHash = "sha256-Cm/KBjcfp+ab4z9nMPeNe91p0Dc5AEXEBQ6WHosd/u4=";
-    npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    npmDepsHash = "sha256-xaGdZavfYvKZv5N+CyhgIneOPcBBlLgBW+B6NNqvTsI=";
     lock = ./locks/playwright-cli-0.1.19.json;
   };
 
@@ -99,7 +99,7 @@ in
     npmName = "@tanstack/cli";
     version = "0.71.0";
     tarballHash = "sha256-vGfUbcvV4v8TcXOIYgheZDMgRjpMzNdyYaf+uvQ3yYY=";
-    npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    npmDepsHash = "sha256-8K3ZwIpVw0EGVKSHuI6NOpPz1m5v7jiqUjb/guy/oy4=";
     lock = ./locks/tanstack-cli-0.71.0.json;
   };
 
@@ -107,7 +107,7 @@ in
     pname = "clerk";
     version = "3.3.0";
     tarballHash = "sha256-FzPSjmS8sGjtgQLltdjZ1+yZHueoWnrTzuppMIECzGo=";
-    npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    npmDepsHash = "sha256-iUZzCcdH4QLWwjv1lsw2oeKvup107tPMslMxUp8m18U=";
     lock = ./locks/clerk-3.3.0.json;
   };
 
@@ -115,7 +115,7 @@ in
     pname = "ruflo";
     version = "3.41.2";
     tarballHash = "sha256-GALYeEfFsDBwPYEwrmjRlXaX+NeDwIfW8rgZ9Lpjjnk=";
-    npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    npmDepsHash = "sha256-i+pQMZ02vSC4PuL1GVS5cdRzrgZrqCKZarzx9wIqtgY=";
     lock = ./locks/ruflo-3.41.2.json;
   };
 
@@ -123,7 +123,7 @@ in
     pname = "gnhf";
     version = "0.1.49";
     tarballHash = "sha256-SIKglBLe7UVUhp3CC8ZM6d+9ukqSJQbRNtSkFJ18Abs=";
-    npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    npmDepsHash = "sha256-v1m1TXKo/zkvp3zSmVM5w55sTejOkCb2wuKDTGwY/Fk=";
     lock = ./locks/gnhf-0.1.49.json;
   };
 }

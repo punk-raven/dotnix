@@ -33,6 +33,10 @@ let
         # requires an explicit fetcherVersion (fetcherVersion 1/2 were
         # removed upstream).
         fetcherVersion = 3;
+        # pnpm 11's supply-chain policy rejects lockfile entries it deems
+        # "trust downgrades". The build hook already sets this (see
+        # pnpm-config-hook.sh), but fetchPnpmDeps runs separately.
+        prePnpmInstall = "export pnpm_config_trust_lockfile=true";
       };
 
       nativeBuildInputs = [ nodejs pnpm pkgs.pnpmConfigHook pkgs.makeWrapper ];
@@ -61,7 +65,7 @@ in
     version = "0.1.35";
     binPath = "dist/bin/gh-axi.js";
     srcHash = "sha256-zuShaNLCh+u5c+CTeX5cgMCk1PUTK8nd7D5zTjTqt9E=";
-    pnpmHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    pnpmHash = "sha256-2vlp9u0I8gb5/VGEQwS9Z57/wOMzV+YW6U+/JL482d0=";
   };
 
   chrome-devtools-axi = mkAxi {
@@ -69,7 +73,7 @@ in
     version = "0.1.34";
     binPath = "dist/bin/chrome-devtools-axi.js";
     srcHash = "sha256-Lv4e2OLXpO3aCZ/08ju3WZjeEtG9TicBNcpGnCfwkDw=";
-    pnpmHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    pnpmHash = "sha256-MhpAmNmUAB8M0p8AlJpw80iRgWIdvKOjv88XAjFqYaU=";
   };
 
   lavish-axi = mkAxi {
@@ -78,7 +82,7 @@ in
     binPath = "dist/cli.mjs";
     # lavish's `pnpm build` = node scripts/build.js (mkAxi's default buildScript runs it)
     srcHash = "sha256-IVB37AuN7vKW+RXHIlny+aBQOPTe0BhHP/pHMDIOPpQ=";
-    pnpmHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    pnpmHash = "sha256-kZ//hT7zRQWt/fdd9Wj3NF6Napmrr6L7YVmXbRLVJ2Q=";
   };
 
   tasks-axi = mkAxi {
@@ -94,10 +98,14 @@ in
     version = "0.1.42";
     binPath = "dist/bin/quota-axi.js";
     srcHash = "sha256-xT9p81N6LD8KtIBSM2Alnlra42Tuv339tCxj24qnNfw=";
-    pnpmHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    pnpmHash = "sha256-6iItfcjzCzU2MwEgAsLJrJDG8Rr1TNrWV7/xvJN+fPc=";
   };
 
-  chrome-devtools-mcp = let version = "1.9.0"; in pkgs.buildNpmPackage {
+  # Pinned to v1.6.0: v1.7.0+ added devtools-frontend as a git submodule
+  # whose nested submodules live on chrome-internal.googlesource.com
+  # (requires Google auth), making fetchSubmodules impossible in a public
+  # Nix build.
+  chrome-devtools-mcp = let version = "1.6.0"; in pkgs.buildNpmPackage {
     pname = "chrome-devtools-mcp";
     inherit version;
     # Task 2 established that pinned pkgs.nodejs (24.x) SIGKILLs under real
@@ -107,9 +115,9 @@ in
       owner = "ChromeDevTools";
       repo = "chrome-devtools-mcp";
       rev = "chrome-devtools-mcp-v${version}";
-      hash = "sha256-g93keCVu5drnirmWV/ugRpcNirunTMAPRU4/pKQ36aE=";
+      hash = "sha256-aHbBrM/bluFjFRUfJkbxGZpdm0m3XAcAiScARKsnIm4=";
     };
-    npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    npmDepsHash = "sha256-Aqin4Y///f1j4MWcG3gA4FGvIfC4lBEGKaKfAMSFdDw=";
     # The default `npmBuildScript` ("build" = `tsc && node scripts/post-build.ts`)
     # only type-checks/transpiles; the resulting build/src/*.js still `import`s
     # devDependencies (e.g. urlpattern-polyfill) straight from node_modules,

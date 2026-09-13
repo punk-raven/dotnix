@@ -49,7 +49,7 @@ modules/
  ├─ darwin.nix        # macOS-only: homebrew, system.defaults, nix-darwin bits
  ├─ linux.nix         # Linux/WSL-only: linux GUI/pkg equivalents, fontconfig
  ├─ gui.nix           # cross-platform GUI apps available in nixpkgs (wezterm...)
- └─ agent-tooling/    # ported from current repo: axi, rtk, caveman, ccusage, codegraph
+ └─ agent-tooling/    # ported from current repo: axi, ccusage, codegraph
 ```
 
 **Split rule:** anything cross-platform (CLI tools, fonts, shell, git, agent
@@ -102,7 +102,7 @@ dotfiles/
 │  ├─ darwin.nix
 │  ├─ linux.nix
 │  ├─ gui.nix
-│  └─ agent-tooling/          # axi-packages.nix, axi.nix, rtk.nix, caveman.nix,
+│  └─ agent-tooling/          # axi-packages.nix, axi.nix,
 │                              # ccusage.nix, codegraph.nix (ported, de-hardcoded)
 ├─ files/                     # dotfiles symlinked by home-manager (nvim, wezterm, agent cfg)
 ├─ install.sh                 # POSIX entry point: macOS + Linux + inside-WSL
@@ -136,9 +136,8 @@ three platforms get the identical CLI environment.
 `git` (+lfs), `starship`, `zsh` (oh-my-zsh, autosuggestion, syntax-highlighting)
 
 **Agent tooling (all platforms - port the current Nix modules):**
-`gh-axi`, `chrome-devtools-axi`, `lavish-axi`, `rtk`, `ccusage`, `codegraph`,
-caveman (`caveman-activate`, `caveman-mode-tracker`, `python3`).
-- These modules currently pin `aarch64-darwin` prebuilt binaries (rtk, ccusage,
+`gh-axi`, `chrome-devtools-axi`, `lavish-axi`, `ccusage`, `codegraph`.
+- These modules currently pin `aarch64-darwin` prebuilt binaries (ccusage,
   codegraph fetch `*-darwin-arm64` tarballs). For Linux/WSL they need the
   `*-linux-x64` / `*-linux-arm64` release artifacts selected by `system`. Build
   a small `pkgs.fetchurl` selector keyed on `system` per tool. The three AXI
@@ -266,7 +265,7 @@ display; headless installs skip GUI modules.
 3. **Extract `darwin.nix`** from `nix/host.nix`: Homebrew (keep `zap`),
    `system.defaults`, `nix-homebrew`, primary user - all guarded to darwin.
 4. **Author `linux.nix`**: fontconfig, Linux-only package guards, GUI opt-ins.
-5. **Port agent-tooling modules** (`axi*`, `rtk`, `caveman`, `ccusage`,
+5. **Port agent-tooling modules** (`axi*`, `ccusage`,
    `codegraph`): add a `system`-keyed source selector so Linux pulls the
    `*-linux-*` release artifacts; keep the bare-name-on-PATH + declarative-hook
    conventions. Verify each upstream ships Linux binaries; build from source
@@ -285,12 +284,9 @@ display; headless installs skip GUI modules.
 ## 8. Risks / open questions
 
 - **Agent-tool Linux binaries - VERIFIED, all covered.** Checked upstream:
-  - `rtk` v0.43.0: ships `aarch64-unknown-linux-gnu` + `x86_64-unknown-linux-musl`
-    (also `.deb`/`.rpm`). Selector caveat: x86_64-linux is **musl-only**,
-    aarch64-linux is **gnu-only** - map accordingly (musl static runs anywhere).
   - `codegraph` v1.3.0: ships `codegraph-linux-arm64` + `codegraph-linux-x64`.
   - `ccusage` 20.0.14: npm `@ccusage/ccusage-linux-{x64,arm64}` both present.
-  - AXI CLIs + `chrome-devtools-mcp` + caveman: build from source / pure Node -
+  - AXI CLIs + `chrome-devtools-mcp`: build from source / pure Node -
     portable, no artifact needed.
   Remaining work is just the `system`-keyed `fetchurl` selector per tool, not a
   question of availability.

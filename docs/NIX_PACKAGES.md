@@ -53,8 +53,6 @@ default you set yourself is never overwritten.
 | Module | On PATH |
 |--------|---------|
 | `axi.nix` | `gh-axi`, `chrome-devtools-axi`, `lavish-axi`, `tasks-axi` (+ pinned `chrome-devtools-mcp` engine as dep) |
-| `rtk.nix` | `rtk` |
-| `caveman.nix` | `caveman-activate`, `caveman-mode-tracker`, `python3` |
 | `ccusage.nix` | `ccusage` |
 | `codegraph.nix` | `codegraph` |
 
@@ -141,10 +139,8 @@ config is an out-of-store symlink and plugins are fetched by neovim's built-in
   sit early on `PATH`, so a project that pins its interpreter with
   `uv python install <version>` should export `UV_MANAGED_PYTHON=1` to make uv
   ignore them. Inside such a project uv wins; pyenv keeps everything else.
-  `modules/common.nix` declares no interpreter itself for the same reason; the
-  `python3` in the table above arrives via `caveman.nix`, and the PATH ordering
-  in `common.nix` keeps it behind pyenv and Homebrew so it never becomes the
-  system python. See "PATH precedence" in [`../README.md`](../README.md).
+  `modules/common.nix` declares no interpreter itself for the same reason.
+  See "PATH precedence" in [`../README.md`](../README.md).
 - `gnumake` is 4.4.1, ahead of the 3.81 that ships with the Xcode CLT, and it
   shadows `/usr/bin/make` on `PATH`.
 - **nvm is installed, but Node is not a Nix package.** `modules/nvm.nix` fetches
@@ -155,7 +151,7 @@ config is an out-of-store symlink and plugins are fetched by neovim's built-in
   `versions/`, `alias/` and `.cache/` in it. No `node`/`npm`/`npx`/`corepack` is
   declared anywhere in the flake, so nvm keeps owning them - which is also why
   the `PATH` ordering in `common.nix` puts the Nix profile above nvm's
-  global-install dir. The `nodejs_22` in `agent-tooling/axi-packages.nix` and
-  `agent-tooling/caveman.nix` is a build-time interpreter baked into those
-  wrappers by absolute store path; it never reaches `PATH`. See "Node and
+  global-install dir. The `nodejs_22` in `agent-tooling/axi-packages.nix` is a
+  build-time interpreter baked into those wrappers by absolute store path; it
+  never reaches `PATH`. See "Node and
   `nvm`" in [`../README.md`](../README.md).

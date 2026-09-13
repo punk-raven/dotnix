@@ -44,16 +44,6 @@
       {
         "hooks": [
           {
-            "command": "caveman-activate",
-            "timeout": 10,
-            "type": "command"
-          }
-        ],
-        "matcher": ""
-      },
-      {
-        "hooks": [
-          {
             "command": "bash '/Users/allan/.codex/herdr-agent-state.sh' session",
             "timeout": 10,
             "type": "command"

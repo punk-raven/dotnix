@@ -120,8 +120,6 @@ in
     ./nvm.nix
     ./floci.nix
     ./agent-tooling/axi.nix
-    ./agent-tooling/rtk.nix
-    ./agent-tooling/caveman.nix
     ./agent-tooling/ccusage.nix
     ./agent-tooling/codegraph.nix
     ./agent-tooling/release-bins.nix
@@ -199,9 +197,7 @@ in
     # ships no `make` at all, while macOS gets 3.81 from the Xcode CLT that
     # install.sh already triggers - declaring it keeps both platforms equal.
     # No interpreter is declared here: projects pin their own via
-    # `uv python install`. One still reaches the profile indirectly, via
-    # agent-tooling/caveman.nix, which is why the PATH ordering below keeps the
-    # profile behind pyenv and Homebrew - see "PATH precedence" in README.md.
+    # `uv python install`.
     uv
     gnumake
     pre-commit
@@ -461,17 +457,8 @@ in
       # it is a no-op on Linux/WSL where neither path exists.
       #
       # Deliberately AFTER the block above, i.e. Homebrew still outranks the Nix
-      # profile. This is the one spot where "Nix-declared wins" and "do not
-      # disturb the Python setup" conflict: the ONLY names present in both
-      # /opt/homebrew/bin and the Nix profile are the Python family (`python3`,
-      # `pydoc3`, `idle3`, `python3-config`) - Nix pulls a python3 in because
-      # modules/agent-tooling/caveman.nix needs one for the caveman-compress
-      # scripts. `pyenv global system` resolves through PATH, so hoisting the
-      # Nix profile over Homebrew would silently swap the system interpreter.
-      # Python belongs to pyenv/uv (see README.md), so Homebrew keeps the edge.
-      # Nothing else collides, and Homebrew and nvm are disjoint, so their
-      # relative order carries no meaning. If a Nix-declared CLI ever gains a
-      # same-named brew, revisit this block rather than the one above.
+      # profile. If a Nix-declared CLI ever gains a same-named brew, revisit
+      # this block rather than the one above.
       if [ -x /opt/homebrew/bin/brew ]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
       elif [ -x /usr/local/bin/brew ]; then
@@ -523,8 +510,8 @@ in
 
   # Dotfiles symlinked from this repo (out-of-store, so edits take effect
   # without a rebuild). Every agent config dir gets the same AGENTS.md + the
-  # RULES.md/TOOLING.md/RTK.md it imports, since each @import resolves relative
-  # to its own dir.
+  # RULES.md/TOOLING.md it imports, since each @import resolves relative to its
+  # own dir.
   home.file = {
     ".config/wezterm".source          = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/.config/wezterm";
     ".config/nvim".source             = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/files/.config/nvim";

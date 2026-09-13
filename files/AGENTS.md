@@ -3,5 +3,3 @@
 @RULES.md
 
 @TOOLING.md
-
-@RTK.md

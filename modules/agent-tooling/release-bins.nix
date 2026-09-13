@@ -7,10 +7,9 @@
 # "PATH precedence" in README.md). That means declaring them is only half the
 # job: the installer's copy must also be removed, or it silently keeps winning.
 #
-# Same shape as modules/agent-tooling/rtk.nix - fetch the official prebuilt
-# artifact for the host platform, hash-pinned, rather than compiling Go on every
-# rebuild. Unlike rtk these two share one asset naming convention, so the
-# fetch/install logic is written once here instead of duplicated per tool.
+# Fetch the official prebuilt artifact for the host platform, hash-pinned,
+# rather than compiling Go on every rebuild. Both tools share one asset naming
+# convention, so the fetch/install logic is written once here.
 #
 # Version bump: change `version`, set the four hashes to pkgs.lib.fakeHash and
 # rebuild to surface them. Faster route, since these releases publish a digest
@@ -45,8 +44,7 @@ let
       dontConfigure = true;
       dontBuild = true;
       # The release binaries are adhoc/linker-signed; stripping them on Darwin
-      # invalidates the signature and the binary refuses to launch. Same reason
-      # rtk.nix sets this.
+      # invalidates the signature and the binary refuses to launch.
       dontFixup = true;
 
       installPhase = ''
@@ -65,36 +63,31 @@ let
 
   treehouse = mkReleaseBin {
     pname = "treehouse";
-    version = "2.1.1";
+    version = "2.3.0";
     description =
       "Pooled, pre-warmed git worktrees so multiple coding agents can share one repo";
     hashes = {
-      "aarch64-darwin" = "sha256-3qvrcVO60UZZ6Y2njeUzSv7K6qx+BZiLEGpIiGRnR9M=";
-      "x86_64-darwin" = "sha256-9va9cf6CeYJqo18gHnnzQQbBxAVheePoFBlCAn3ZkqY=";
-      "aarch64-linux" = "sha256-mANnwCMydOsxgaGaLKjsadCbSliLonNnk30zb5osk44=";
-      "x86_64-linux" = "sha256-L+PgEiCuUalnw+W6bM8Q7IO9uujkIDaNGUKFqNBMnvg=";
+      "aarch64-darwin" = "sha256-HLCbz6gwtO7F5UvuqnFYmtucXYKFc92g9RUOLYDPE9U=";
+      "x86_64-darwin" = "sha256-NJr8wTwr6yDYRutWChGzDhpcq44t+yKYijaqfyE7WIE=";
+      "aarch64-linux" = "sha256-QIWJunK1jV6UIHHthjqD/ZZWbP0eUUlF2qWd795Si7s=";
+      "x86_64-linux" = "sha256-lP0rLCDDWqwd3ClBMXiQrYLJkW9czsusSlDNp4Pu0Q8=";
     };
   };
 
-  # Pinned to v1.45.4, the newest release NOT marked prerelease - upstream has
-  # tagged v1.46.0 through v1.48.0 as prereleases, and the tool's own
-  # ~/.no-mistakes/update-check.json agrees that 1.45.4 is latest. Track the
-  # stable line here rather than whatever tag happens to be newest.
-  #
   # Only the binary is declared. ~/.no-mistakes is live runtime state - it holds
   # a daemon socket, daemon.pid, rotating logs, worktrees and state.sqlite - so
   # it must stay writable and unmanaged, exactly like ~/.config/herdr in
   # modules/common.nix. Nix owning that directory would break the daemon.
   no-mistakes = mkReleaseBin {
     pname = "no-mistakes";
-    version = "1.45.4";
+    version = "1.72.0";
     description =
       "Validation pipeline - review, tests, lint, docs, PR and CI - before changes reach the push target";
     hashes = {
-      "aarch64-darwin" = "sha256-eXi2jJMSBwiNn/fGJVaF9grmskDKFSKPBT1nTtlK+OU=";
-      "x86_64-darwin" = "sha256-JZaqIKLDNzuLwoJg5/460xoy58nAuU2uDHnYBawDmTY=";
-      "aarch64-linux" = "sha256-GaxixNHXpALX7+gUJPoDa2dhYAHTfZuVr7qcYMDT5FM=";
-      "x86_64-linux" = "sha256-EczwvKpXWwa9aRZExmnFc+KmLeahwbmOnlLTTC3yrRk=";
+      "aarch64-darwin" = "sha256-w6OOleBQww7jA4BvIvvccI+UXijWsknY6VQN5lvstcc=";
+      "x86_64-darwin" = "sha256-uCqHO+lHNnDzir4dmiGmSHfERTB9hd/Y0Q39jT4fkNI=";
+      "aarch64-linux" = "sha256-kvQCZUveqEXe2c68pB/VZeKuZUu4HJziKC4KJhDfhzY=";
+      "x86_64-linux" = "sha256-wia2m4uBFYJ9LkOOqLMur/m4kpGh0v3cXvJEkBe42Sc=";
     };
   };
 in

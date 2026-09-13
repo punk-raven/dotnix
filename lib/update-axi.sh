@@ -15,10 +15,10 @@
 # surface the real ones, paste back. It only rewrites the file - it never
 # activates. Review with `git diff` and run `rebuild` yourself.
 #
-# Scope: the mkAxi packages only. rtk/ccusage/codegraph/caveman carry a
-# per-system source selector with four platform hashes each and are a different
-# shape; chrome-devtools-mcp tracks a Google repo, not kunchenguid. Those stay
-# manual, and the script says so rather than pretending it covered them.
+# Scope: the mkAxi packages only. ccusage/codegraph carry a per-system source
+# selector with four platform hashes each and are a different shape;
+# chrome-devtools-mcp tracks a Google repo, not kunchenguid. Those stay manual,
+# and the script says so rather than pretending it covered them.
 
 set -euo pipefail
 
@@ -147,6 +147,6 @@ ${bumped} bumped, hashes resolved. Nothing has been activated.
   rebuild
 
 Not covered by this script - bump these by hand if needed:
-  rtk, ccusage, codegraph, caveman   (per-system selector, 4 hashes each)
+  ccusage, codegraph                 (per-system selector, 4 hashes each)
   chrome-devtools-mcp                (tracks ChromeDevTools, not ${GITHUB_OWNER})
 EOF

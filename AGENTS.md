@@ -66,7 +66,7 @@ Two traps worth knowing before you touch them:
 
 ## Agent-tooling version bumps
 
-The prebuilt tools (`rtk`, `ccusage`, `codegraph`, and `floci` in
+The prebuilt tools (`ccusage`, `codegraph`, and `floci` in
 `modules/floci.nix`) carry a per-`system` source selector with an SRI hash for
 each platform. Bump the version, set the changed hashes to `pkgs.lib.fakeHash`,
 rebuild to surface the real hashes, paste back. Grab a hash directly with `nix

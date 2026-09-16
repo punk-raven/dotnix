@@ -10,7 +10,7 @@ let
   # it.
   #
   # It needs a Docker-compatible daemon at runtime; that is already covered on
-  # both surfaces - the `docker-desktop` cask in modules/darwin.nix and
+  # both surfaces - OrbStack in modules/orbstack.nix (macOS) and
   # `docker-client` in modules/linux.nix (whose daemon lives on the Windows side
   # under WSL2). Nothing extra is declared here for it.
   #

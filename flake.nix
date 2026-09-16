@@ -81,6 +81,7 @@
           specialArgs = { inherit cfg; };
           modules = [
             ./modules/darwin.nix
+            ./modules/orbstack.nix
             nix-homebrew.darwinModules.nix-homebrew
             home-manager.darwinModules.home-manager
             ({ pkgs, ... }: {

@@ -79,5 +79,15 @@ in
       /usr/bin/xattr -dr com.apple.quarantine "$app_dst"
       echo "${version}-${build}" > "$marker"
     fi
+
+    # OrbStack ships docker-compose as a standalone binary but does not
+    # register it as a Docker CLI plugin, so `docker compose` (subcommand
+    # form used by most Makefiles) fails. Symlink it into the plugin dir.
+    compose_bin="$HOME/.orbstack/bin/docker-compose"
+    plugin_dir="$HOME/.docker/cli-plugins"
+    if [ -x "$compose_bin" ]; then
+      mkdir -p "$plugin_dir"
+      ln -sf "$compose_bin" "$plugin_dir/docker-compose"
+    fi
   '';
 }

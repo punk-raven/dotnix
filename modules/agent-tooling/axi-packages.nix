@@ -62,17 +62,17 @@ in
 {
   gh-axi = mkAxi {
     pname = "gh-axi";
-    version = "0.1.35";
+    version = "0.1.36";
     binPath = "dist/bin/gh-axi.js";
-    srcHash = "sha256-zuShaNLCh+u5c+CTeX5cgMCk1PUTK8nd7D5zTjTqt9E=";
+    srcHash = "sha256-y+VGmIdc2qXLL57poQ6ZgDegaR3jyHjrMeMsQfALAq8=";
     pnpmHash = "sha256-2vlp9u0I8gb5/VGEQwS9Z57/wOMzV+YW6U+/JL482d0=";
   };
 
   chrome-devtools-axi = mkAxi {
     pname = "chrome-devtools-axi";
-    version = "0.1.34";
+    version = "0.1.39";
     binPath = "dist/bin/chrome-devtools-axi.js";
-    srcHash = "sha256-Lv4e2OLXpO3aCZ/08ju3WZjeEtG9TicBNcpGnCfwkDw=";
+    srcHash = "sha256-XP/+6qumcJHmX5UrZb8R00mmwXVPtLtNCJUnYNsqGgc=";
     pnpmHash = "sha256-MhpAmNmUAB8M0p8AlJpw80iRgWIdvKOjv88XAjFqYaU=";
   };
 
@@ -87,17 +87,17 @@ in
 
   tasks-axi = mkAxi {
     pname = "tasks-axi";
-    version = "0.2.5";
+    version = "0.2.6";
     binPath = "dist/bin/tasks-axi.js";
-    srcHash = "sha256-obwgvKls8GljbUdFrl7ht9+k0AEQjdqvLGf4UHscv+M=";
+    srcHash = "sha256-nf6KkZEoJ+BD7PeGat/GVk8FQbuAJ0AHR5XuX+bwlZo=";
     pnpmHash = "sha256-BtnZnvjHsPRchvlsy1vhkTf4+aYlx97Eh6RyjWpKcLg=";
   };
 
   quota-axi = mkAxi {
     pname = "quota-axi";
-    version = "0.1.42";
+    version = "0.1.59";
     binPath = "dist/bin/quota-axi.js";
-    srcHash = "sha256-xT9p81N6LD8KtIBSM2Alnlra42Tuv339tCxj24qnNfw=";
+    srcHash = "sha256-WGQ3ivJifsOxWVmaMDJrcTOu+g0lUxighdm8SITYhRg=";
     pnpmHash = "sha256-6iItfcjzCzU2MwEgAsLJrJDG8Rr1TNrWV7/xvJN+fPc=";
   };
 

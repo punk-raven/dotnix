@@ -1,15 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(rm /var/folders/78/h841hq3n2c5f6087ks28v2240000gn/T/no-mistakes-evidence/:*)",
-      "Bash(rm -f /var/folders/78/h841hq3n2c5f6087ks28v2240000gn/T/no-mistakes-evidence/:*)",
-      "Bash(rm -r /var/folders/78/h841hq3n2c5f6087ks28v2240000gn/T/no-mistakes-evidence/:*)",
-      "Bash(rm -rf /var/folders/78/h841hq3n2c5f6087ks28v2240000gn/T/no-mistakes-evidence/:*)",
-      "Bash(rm /tmp/no-mistakes-evidence/:*)",
-      "Bash(rm -f /tmp/no-mistakes-evidence/:*)",
-      "Bash(rm -r /tmp/no-mistakes-evidence/:*)",
-      "Bash(rm -rf /tmp/no-mistakes-evidence/:*)"
-    ],
+    "allow": [],
     "ask": [
       "Bash(rm:*)",
       "Bash(rmdir:*)",
@@ -73,7 +64,7 @@
         ]
       },
       {
-        "matcher": "*",
+        "matcher": "^(startup|resume|clear|compact|fork)$",
         "hooks": [
           {
             "type": "command",
@@ -90,10 +81,47 @@
   },
   "enabledPlugins": {
     "vercel@claude-plugins-official": true,
-    "sentry@claude-plugins-official": true
+    "sentry@claude-plugins-official": true,
+    "legal@synced": false,
+    "product-management@synced": false,
+    "exa@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {},
-  "model": "claude-opus-4-6[1m]",
+  "skipDangerousModePermissionPrompt": true,
   "theme": "dark-daltonized",
-  "skipDangerousModePermissionPrompt": true
+  "agentPushNotifEnabled": true,
+  "autoMode": {
+    "soft_deny": [
+      "$defaults",
+      "Bash(rm -rf hive-*/.env*:*) — protect committed env files from bulk deletion",
+      "Bash(psql:* against docker-compose.prod.yml-referenced hosts) — production-adjacent DB access"
+    ],
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: AWS (seen in shell history: `aws`, `tofu`; hive-infra Terraform/SSM scripts)",
+      "**Repository visibility**: Not queryable here (no git remotes configured in this checkout) — assume private per shipped default",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: AWS SSM Parameter Store (config-derived — hive-infra/scripts/create-ssm-secret.sh, migrate_secrets_to_shared_namespace.sh, setup-app-secrets.sh; hive-api-backend/app/core/secrets_manager.py and sql/migrations/20260407_120000_migrate_ssm_to_encrypted_params.sql; not usage-corroborated)",
+      "**Default / protected branches**: Unknown — origin/HEAD unset, no remotes in this checkout; gh check not queryable",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine with open internet",
+      "**Source control**: The trusted repo (roomangel workspace, no remotes configured) only — no additional orgs configured",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: .env and .env.example/.env.local/.env.test files across hive-admin-backend, hive-api-backend, hive-connector, hive-frontend-monorepo apps (admin-portal, hive, oauth-proxy); hive-admin-backend/docker-compose.prod.yml; hive-infra secret-management scripts and terraform bootstrap state (.terraform.lock.hcl, main.tf) — share only with audiences cleared at the [named+specifics] bar",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment (e.g. hive-admin-backend/docker-compose.prod.yml deploy targets)",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: hive-infra/terraform/bootstrap/ (IAM, RBAC, networking, quota, node-pool resources); anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development — multi-repo Hive workspace (hive-admin-backend, hive-api-backend, hive-connector, hive-frontend-monorepo, hive-infra), heavy subagent delegation and PRD-driven workflow",
+      "**Trusted repo**: The roomangel workspace at /Users/allan/Projects/roomangel and its member repos (hive-admin-backend, hive-api-backend, hive-connector, hive-frontend-monorepo, hive-infra) — no remotes configured in this checkout",
+      "**Org-specific CLIs**: lavish-axi, chrome-devtools-axi, gh-axi, floci, herdr, tofu, no-mistakes, treehouse, pi (seen frequently in transcripts/shell history; purpose not independently confirmed)",
+      "**routine under**: `.lavish/` and `.claude-tmp/` at the workspace root only — never at repo level, per CLAUDE.md file-location rules"
+    ]
+  }
 }

@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  version = "1.6.0";
+  version = "1.6.2";
 
   # CodeGraph (https://github.com/colbymchenry/codegraph): a local, pre-indexed
   # code knowledge graph (SQLite + tree-sitter) that exposes an MCP server so
@@ -26,10 +26,10 @@ let
   #   nix store prefetch-file --json \
   #     https://github.com/colbymchenry/codegraph/releases/download/v<VER>/<asset>.tar.gz
   sources = {
-    "aarch64-darwin" = { asset = "codegraph-darwin-arm64"; hash = "sha256-HHMDNRLVX2e+BHF+gVMui+r3vm+4Ux9RoXn6IwZK1IA="; };
-    "x86_64-darwin"  = { asset = "codegraph-darwin-x64"; hash = "sha256-y4aiti7mdrYqVr+EI2AOfYZ+dS5X8yPNyYwPYjbv2Qg="; };
-    "aarch64-linux"  = { asset = "codegraph-linux-arm64"; hash = "sha256-bck1p7jxph5oileLmOo0aA6y4217kdsHnWT0AR8aZo8="; };
-    "x86_64-linux"   = { asset = "codegraph-linux-x64"; hash = "sha256-3jOR957UJiLZN+bNW3ZCp+qLt9FHNgfoC4ebpz7yFrA="; };
+    "aarch64-darwin" = { asset = "codegraph-darwin-arm64"; hash = "sha256-100b+0Bg22PsPCtyxOF/dsMZeK87rWrOQ3DRUBrAZi4="; };
+    "x86_64-darwin"  = { asset = "codegraph-darwin-x64"; hash = "sha256-U9Gk0amvMdbOwRs0bfKueSCHCB4T9iP1g+J3g8Hn+bw="; };
+    "aarch64-linux"  = { asset = "codegraph-linux-arm64"; hash = "sha256-yMa+KSviHQDeomutiyjUNHMc9hL7jMR13BD1swOLW2Q="; };
+    "x86_64-linux"   = { asset = "codegraph-linux-x64"; hash = "sha256-7wr0FgkhKPsczHI3hgALft9KaXH+YErNCL+Wbk83uCg="; };
   };
   source = sources.${pkgs.stdenv.hostPlatform.system};
 

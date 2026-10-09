@@ -79,44 +79,44 @@ in
 {
   vercel = mkNpmCli {
     pname = "vercel";
-    version = "59.16.0";
-    tarballHash = "sha256-WEl7g9pY8Sci2NW75M1rOWW5GFB4meRZ/upK9KVxd3E=";
-    npmDepsHash = "sha256-Pa6U0FPw+xOZRWaiuE8KU8WrSGKqWmJeYoshPhZ1b2s=";
-    lock = ./locks/vercel-59.16.0.json;
+    version = "63.1.0";
+    tarballHash = "sha256-l41Dk7Ii/RzYqalMj7PA46xKDhwPn6FHu1Iah9/RJPo=";
+    npmDepsHash = "sha256-5wUfxV6CaJFC5i555uHOULyE6HmAm60P4BomZ/1RBss=";
+    lock = ./locks/vercel-63.1.0.json;
   };
 
   playwright-cli = mkNpmCli {
     pname = "playwright-cli";
     npmName = "@playwright/cli";
-    version = "0.1.19";
-    tarballHash = "sha256-Cm/KBjcfp+ab4z9nMPeNe91p0Dc5AEXEBQ6WHosd/u4=";
-    npmDepsHash = "sha256-xaGdZavfYvKZv5N+CyhgIneOPcBBlLgBW+B6NNqvTsI=";
-    lock = ./locks/playwright-cli-0.1.19.json;
+    version = "0.1.22";
+    tarballHash = "sha256-u0hAvhcAbit7qFYiTcMGL2Vx1fZHNSR2+Vxed/9dZ5o=";
+    npmDepsHash = "sha256-HHW0EKGodJs6E6oBUrqi0ScYrbVViufSrbPOaChj4ps=";
+    lock = ./locks/playwright-cli-0.1.22.json;
   };
 
   tanstack-cli = mkNpmCli {
     pname = "tanstack-cli";
     npmName = "@tanstack/cli";
-    version = "0.71.0";
-    tarballHash = "sha256-vGfUbcvV4v8TcXOIYgheZDMgRjpMzNdyYaf+uvQ3yYY=";
-    npmDepsHash = "sha256-8K3ZwIpVw0EGVKSHuI6NOpPz1m5v7jiqUjb/guy/oy4=";
-    lock = ./locks/tanstack-cli-0.71.0.json;
+    version = "0.71.1";
+    tarballHash = "sha256-RI4MCwdwDiW1Gha2xPwHiqdNLF+Hnyy9bjJx2rxQkQ0=";
+    npmDepsHash = "sha256-P09u3c/SsiRCPw0alXA6d7EZOH0cMYb62eNXSChL1Zo=";
+    lock = ./locks/tanstack-cli-0.71.1.json;
   };
 
   clerk = mkNpmCli {
     pname = "clerk";
-    version = "3.3.0";
-    tarballHash = "sha256-FzPSjmS8sGjtgQLltdjZ1+yZHueoWnrTzuppMIECzGo=";
-    npmDepsHash = "sha256-iUZzCcdH4QLWwjv1lsw2oeKvup107tPMslMxUp8m18U=";
-    lock = ./locks/clerk-3.3.0.json;
+    version = "3.4.1";
+    tarballHash = "sha256-ysXV1SyZvdf6bUSjP6eFCOdjUGHE12B7xVYjyZvmZwM=";
+    npmDepsHash = "sha256-USfWsb5UkOs20p2dNxCLsfMNGkDRNWaI/DGGED+A6Ok=";
+    lock = ./locks/clerk-3.4.1.json;
   };
 
 
   gnhf = mkNpmCli {
     pname = "gnhf";
-    version = "0.1.49";
-    tarballHash = "sha256-SIKglBLe7UVUhp3CC8ZM6d+9ukqSJQbRNtSkFJ18Abs=";
-    npmDepsHash = "sha256-v1m1TXKo/zkvp3zSmVM5w55sTejOkCb2wuKDTGwY/Fk=";
-    lock = ./locks/gnhf-0.1.49.json;
+    version = "0.1.51";
+    tarballHash = "sha256-8rrtCWz0npY+V4tsd37SESPlIfElAN69lCIend0Yoew=";
+    npmDepsHash = "sha256-jJiO8OK8v8lE+IKNhl8PZXFm+12LwJu5Ihjpmzu/Tj0=";
+    lock = ./locks/gnhf-0.1.51.json;
   };
 }

@@ -78,10 +78,10 @@ in
 
   lavish-axi = mkAxi {
     pname = "lavish-axi";
-    version = "0.1.67";
+    version = "0.1.85";
     binPath = "dist/cli.mjs";
     # lavish's `pnpm build` = node scripts/build.js (mkAxi's default buildScript runs it)
-    srcHash = "sha256-IVB37AuN7vKW+RXHIlny+aBQOPTe0BhHP/pHMDIOPpQ=";
+    srcHash = "sha256-t/r672iCFBY4JrV8cOMRifYKdyt5d6lPi9+L/TOS2Zw=";
     pnpmHash = "sha256-kZ//hT7zRQWt/fdd9Wj3NF6Napmrr6L7YVmXbRLVJ2Q=";
   };
 
@@ -95,9 +95,9 @@ in
 
   quota-axi = mkAxi {
     pname = "quota-axi";
-    version = "0.1.59";
+    version = "0.1.60";
     binPath = "dist/bin/quota-axi.js";
-    srcHash = "sha256-WGQ3ivJifsOxWVmaMDJrcTOu+g0lUxighdm8SITYhRg=";
+    srcHash = "sha256-hnoF6v5QDqagxG7Fq6zxEc6whbp71ULId+kxxHCN2To=";
     pnpmHash = "sha256-6iItfcjzCzU2MwEgAsLJrJDG8Rr1TNrWV7/xvJN+fPc=";
   };
 

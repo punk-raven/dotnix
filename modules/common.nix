@@ -151,6 +151,15 @@ in
     # documented relative order once both are demoted below the Nix profile.
     config.dotnix.nvm.nodeBinDir
     "$HOME/.yarn/bin"     # yarn global binaries
+  ] ++ lib.optionals pkgs.stdenv.isDarwin [
+    # OrbStack's docker/compose/kubectl/orb shims (modules/orbstack.nix). Same
+    # case as `~/.maestro/bin` above: a single app owns the dir, so nothing
+    # arbitrary can shadow a flake pin, and there is no Nix-declared `docker` on
+    # darwin to conflict. Declared here rather than left to OrbStack's own
+    # `source ~/.orbstack/shell/init.zsh` because that append lands in
+    # `~/.zprofile` (login shells only) - non-interactive `zsh -c 'docker ...'`,
+    # hooks, editor tasks and cron would see no `docker`.
+    "$HOME/.orbstack/bin"
   ];
 
   # See `envExtraLandsAfterSessionVars` above: this guards the one home-manager

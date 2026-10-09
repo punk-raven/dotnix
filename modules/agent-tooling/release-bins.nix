@@ -63,14 +63,14 @@ let
 
   treehouse = mkReleaseBin {
     pname = "treehouse";
-    version = "2.3.0";
+    version = "3.1.2";
     description =
       "Pooled, pre-warmed git worktrees so multiple coding agents can share one repo";
     hashes = {
-      "aarch64-darwin" = "sha256-HLCbz6gwtO7F5UvuqnFYmtucXYKFc92g9RUOLYDPE9U=";
-      "x86_64-darwin" = "sha256-NJr8wTwr6yDYRutWChGzDhpcq44t+yKYijaqfyE7WIE=";
-      "aarch64-linux" = "sha256-QIWJunK1jV6UIHHthjqD/ZZWbP0eUUlF2qWd795Si7s=";
-      "x86_64-linux" = "sha256-lP0rLCDDWqwd3ClBMXiQrYLJkW9czsusSlDNp4Pu0Q8=";
+      "aarch64-darwin" = "sha256-JGZt3sNGtf0fBGf0dcZH2OLORegOioRUjq3pezU8vks=";
+      "x86_64-darwin" = "sha256-GaOnnHkhOeNsH1w+ng+f3r6RJ/EWix3rtAtFE//tExk=";
+      "aarch64-linux" = "sha256-mZ5vSIjP1ObAuX1JpIVzVSCLy6CAqixZkC9/p3uUDAo=";
+      "x86_64-linux" = "sha256-vAWcbbvPaxGnQekq7R2EXVtKlvHZxeb3jBqiUCZpli0=";
     };
   };
 
@@ -80,14 +80,14 @@ let
   # modules/common.nix. Nix owning that directory would break the daemon.
   no-mistakes = mkReleaseBin {
     pname = "no-mistakes";
-    version = "1.72.0";
+    version = "1.84.0";
     description =
       "Validation pipeline - review, tests, lint, docs, PR and CI - before changes reach the push target";
     hashes = {
-      "aarch64-darwin" = "sha256-w6OOleBQww7jA4BvIvvccI+UXijWsknY6VQN5lvstcc=";
-      "x86_64-darwin" = "sha256-uCqHO+lHNnDzir4dmiGmSHfERTB9hd/Y0Q39jT4fkNI=";
-      "aarch64-linux" = "sha256-kvQCZUveqEXe2c68pB/VZeKuZUu4HJziKC4KJhDfhzY=";
-      "x86_64-linux" = "sha256-wia2m4uBFYJ9LkOOqLMur/m4kpGh0v3cXvJEkBe42Sc=";
+      "aarch64-darwin" = "sha256-Ll+DgwOrcn7czRpgpINAaAJGBsaK59l/3A/e7Ne9TZA=";
+      "x86_64-darwin" = "sha256-iLGkgZJEiPVUVrP5YHD3ObEJ4ZVVIy5Pi+Cn6658CKw=";
+      "aarch64-linux" = "sha256-jYzv2Se3+SHCB+TdbFdQgdwlXcBo8CBfdLUuSCvy96s=";
+      "x86_64-linux" = "sha256-sPuKnfQSxfofuSo1hP+h1NW01uDRc476L4uIMg+L8cI=";
     };
   };
 in

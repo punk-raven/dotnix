@@ -49,14 +49,14 @@ let
   # nvm downloads it at activation. Pick a real LTS from
   # https://nodejs.org/dist/index.json - "--lts" is deliberately NOT used, so a
   # rebuild never silently changes the Node a machine runs.
-  nvmVersion = "0.40.7";
+  nvmVersion = "0.40.8";
   nodeVersion = "v24.21.0"; # Krypton, the active LTS line
 
   # fetchzip, not fetchurl: it hashes the unpacked tree, so a GitHub tarball
   # re-compression cannot invalidate the pin.
   nvmSrc = pkgs.fetchzip {
     url = "https://github.com/nvm-sh/nvm/archive/refs/tags/v${nvmVersion}.tar.gz";
-    hash = "sha256-bClD8XKR9yWztQQ3BDHES7VK2dyPCL1yqULpPR/K+wM=";
+    hash = "sha256-24FP1brAAyWu+Q0Dk+Y4aXgdCBon9GkBXgFaGXBO7sc=";
   };
 
   # Just nvm's runtime files. nvm.sh is the library the shell sources, nvm-exec

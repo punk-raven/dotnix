@@ -53,7 +53,11 @@
       "git-filter-repo"
       "ktlint"
       "libb2"
-      "mongodb-database-tools"
+      # Fully qualified so Homebrew 6+ tap trust applies. nix-darwin renders
+      # every brew with `trusted: true`, but brew bundle only records trust for
+      # `user/repo/formula` names; a bare name is refused as coming from the
+      # untrusted mongodb/brew tap and aborts activation.
+      "mongodb/brew/mongodb-database-tools"
       "opentofu"
       "pinentry-mac"
       "pyenv"

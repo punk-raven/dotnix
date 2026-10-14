@@ -80,14 +80,14 @@ let
   # modules/common.nix. Nix owning that directory would break the daemon.
   no-mistakes = mkReleaseBin {
     pname = "no-mistakes";
-    version = "1.84.0";
+    version = "1.87.1";
     description =
       "Validation pipeline - review, tests, lint, docs, PR and CI - before changes reach the push target";
     hashes = {
-      "aarch64-darwin" = "sha256-Ll+DgwOrcn7czRpgpINAaAJGBsaK59l/3A/e7Ne9TZA=";
-      "x86_64-darwin" = "sha256-iLGkgZJEiPVUVrP5YHD3ObEJ4ZVVIy5Pi+Cn6658CKw=";
-      "aarch64-linux" = "sha256-jYzv2Se3+SHCB+TdbFdQgdwlXcBo8CBfdLUuSCvy96s=";
-      "x86_64-linux" = "sha256-sPuKnfQSxfofuSo1hP+h1NW01uDRc476L4uIMg+L8cI=";
+      "aarch64-darwin" = "sha256-L092pIrWPoKFxh/cYgnyLHB4S0aB5gIIaady2jwsDpo=";
+      "x86_64-darwin" = "sha256-J/Krr0hNlPkyGIx+0w87EivXOeWvdT4ccYYNJKz4FYA=";
+      "aarch64-linux" = "sha256-jzWEdcerLBKv1gD5xI8KWWnoB2YicZd/x3t5HTj/Kk0=";
+      "x86_64-linux" = "sha256-bsAYkQhYc6ZvlkLJuZDoGV8MJcYxsIqUhrSUvsnmCXI=";
     };
   };
 in

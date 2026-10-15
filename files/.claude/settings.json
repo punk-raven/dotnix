@@ -86,7 +86,14 @@
     "product-management@synced": false,
     "exa@claude-plugins-official": true
   },
-  "extraKnownMarketplaces": {},
+  "extraKnownMarketplaces": {
+    "langsmith-claude-code-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "langchain-ai/langsmith-claude-code-plugins"
+      }
+    }
+  },
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark-daltonized",
   "agentPushNotifEnabled": true,

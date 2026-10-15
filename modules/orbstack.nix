@@ -17,17 +17,17 @@
 { pkgs, lib, cfg, ... }:
 
 let
-  version = "2.2.3";
-  build = "20963";
+  version = "2.2.4";
+  build = "21120";
 
   sources = {
     "aarch64-darwin" = {
       asset = "OrbStack_v${version}_${build}_arm64.dmg";
-      hash = "sha256-fKd4aPOg19n1ez+YYVqtMMxZ0jzIS7/xP3iEbfC0k9Q=";
+      hash = "sha256-8MaY5wnJn7Puh/ksOgRFxrj1oQ1qDt1PTUYZJdGUuGo=";
     };
     "x86_64-darwin" = {
       asset = "OrbStack_v${version}_${build}_amd64.dmg";
-      hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      hash = "sha256-sYs5ev9+gat9Y5NKVp2mWexzsKGamfp1IdS3XJbbVUQ=";
     };
   };
   source = sources.${pkgs.stdenv.hostPlatform.system};

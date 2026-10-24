@@ -1,7 +1,7 @@
 { pkgs, lib, ... }:
 
 let
-  version = "0.3.0";
+  version = "0.4.0";
 
   # floci (https://github.com/floci-io/floci-cli): the CLI for Floci, an
   # open-source local cloud emulator for AWS, GCP, Azure and OCI. It drives a
@@ -35,10 +35,10 @@ let
   #   curl -sL https://github.com/floci-io/floci-cli/releases/download/<VER>/sha256sums.txt
   #   nix hash convert --hash-algo sha256 --to sri <hex>
   sources = {
-    "aarch64-darwin" = { asset = "floci-darwin-arm64"; hash = "sha256-ct+L2UGAV7ddsDIakUJzfgSRxxCG152ef8a1XSQF6Xo="; };
-    "x86_64-darwin"  = { asset = "floci-darwin-amd64"; hash = "sha256-rb/20DZF0nG/ddVg4lZ58pXaGT/z51jXjSjFzzr6Dmc="; };
-    "aarch64-linux"  = { asset = "floci-linux-arm64"; hash = "sha256-pHxAc8iniBsD1Bv8pn44QQ4sRz6Y8e7iTqQ4UCfWj0Y="; };
-    "x86_64-linux"   = { asset = "floci-linux-amd64"; hash = "sha256-9HVIU72BZVEdqrctYwUVI6/mnyCidvRPdL58GIvbiqA="; };
+    "aarch64-darwin" = { asset = "floci-darwin-arm64"; hash = "sha256-PAkUwS8tv81V6qFk7eOq77o8zxarUg6N0MO7RM1GgIA="; };
+    "x86_64-darwin"  = { asset = "floci-darwin-amd64"; hash = "sha256-QK6ONOaoLy23m/yNUpoof18qONYSPKjm9CIFLn4NI2Y="; };
+    "aarch64-linux"  = { asset = "floci-linux-arm64"; hash = "sha256-YrLRwgL1BB1UXlrmgaONydwUj7NVoLiyA9yuCwlRY3s="; };
+    "x86_64-linux"   = { asset = "floci-linux-amd64"; hash = "sha256-zfRgPhaaAwtX0Ysv/27z9qStRaK78TeZLLnPaRxGIPg="; };
   };
   source = sources.${pkgs.stdenv.hostPlatform.system};
 

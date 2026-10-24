@@ -79,10 +79,10 @@ in
 {
   vercel = mkNpmCli {
     pname = "vercel";
-    version = "63.1.0";
-    tarballHash = "sha256-l41Dk7Ii/RzYqalMj7PA46xKDhwPn6FHu1Iah9/RJPo=";
-    npmDepsHash = "sha256-5wUfxV6CaJFC5i555uHOULyE6HmAm60P4BomZ/1RBss=";
-    lock = ./locks/vercel-63.1.0.json;
+    version = "65.1.0";
+    tarballHash = "sha256-kbB9Keq5gYQG6y2S9iG/vcdtS4lgWXA27u3NWPtmeEc=";
+    npmDepsHash = "sha256-wsy6Xcr+uCvUwIOL6JmTnRDpogh4qJV2ToFSrLiXdro=";
+    lock = ./locks/vercel-65.1.0.json;
   };
 
   playwright-cli = mkNpmCli {
@@ -97,18 +97,18 @@ in
   tanstack-cli = mkNpmCli {
     pname = "tanstack-cli";
     npmName = "@tanstack/cli";
-    version = "0.71.1";
-    tarballHash = "sha256-RI4MCwdwDiW1Gha2xPwHiqdNLF+Hnyy9bjJx2rxQkQ0=";
-    npmDepsHash = "sha256-P09u3c/SsiRCPw0alXA6d7EZOH0cMYb62eNXSChL1Zo=";
-    lock = ./locks/tanstack-cli-0.71.1.json;
+    version = "0.72.0";
+    tarballHash = "sha256-bE6ZhXdTSosXHyWBt8t0lChRC+km9dMJWss815RoO4I=";
+    npmDepsHash = "sha256-hKS0e8w16KzrzjnxzeLFlc7zNZzeDNDGAgqCsi4ujTg=";
+    lock = ./locks/tanstack-cli-0.72.0.json;
   };
 
   clerk = mkNpmCli {
     pname = "clerk";
-    version = "3.4.1";
-    tarballHash = "sha256-ysXV1SyZvdf6bUSjP6eFCOdjUGHE12B7xVYjyZvmZwM=";
-    npmDepsHash = "sha256-USfWsb5UkOs20p2dNxCLsfMNGkDRNWaI/DGGED+A6Ok=";
-    lock = ./locks/clerk-3.4.1.json;
+    version = "4.0.0";
+    tarballHash = "sha256-fRnLmW0878RVVcfrZ/RL7F8Bjco89MRnD95RGeyREdc=";
+    npmDepsHash = "sha256-AbJ3W1HmBY1DDsMt0avyPYR35VyCEBSaSXWOA0ew7b0=";
+    lock = ./locks/clerk-4.0.0.json;
   };
 
 

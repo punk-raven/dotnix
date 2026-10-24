@@ -1,0 +1,133 @@
+{
+  "name": "clerk",
+  "version": "4.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "clerk",
+      "version": "4.0.0",
+      "license": "MIT",
+      "bin": {
+        "clerk": "bin/clerk"
+      },
+      "engines": {
+        "node": ">=20.0.0"
+      },
+      "optionalDependencies": {
+        "@clerk/cli-darwin-arm64": "4.0.0",
+        "@clerk/cli-darwin-x64": "4.0.0",
+        "@clerk/cli-linux-arm64": "4.0.0",
+        "@clerk/cli-linux-arm64-musl": "4.0.0",
+        "@clerk/cli-linux-x64": "4.0.0",
+        "@clerk/cli-linux-x64-musl": "4.0.0",
+        "@clerk/cli-win32-arm64": "4.0.0",
+        "@clerk/cli-win32-x64": "4.0.0"
+      }
+    },
+    "node_modules/@clerk/cli-darwin-arm64": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-darwin-arm64/-/cli-darwin-arm64-4.0.0.tgz",
+      "integrity": "sha512-dtPE7yqfP7/56knN7kqSxdY5ZN51jl2b8COz9JdGoPn/H/wgtqR5paoq3dgINZU706UoqvwvHDQjyeiNQSMW8Q==",
+      "cpu": [
+        "arm64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "darwin"
+      ]
+    },
+    "node_modules/@clerk/cli-darwin-x64": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-darwin-x64/-/cli-darwin-x64-4.0.0.tgz",
+      "integrity": "sha512-ooxR1oIPcBarVIKOzL1F02FEyYQ4uSb5fBh8yknl3iZ24OQ0T97jRzuMnBSuqt/APXLNKxW24wubQ3+f67zOXQ==",
+      "cpu": [
+        "x64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "darwin"
+      ]
+    },
+    "node_modules/@clerk/cli-linux-arm64": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-linux-arm64/-/cli-linux-arm64-4.0.0.tgz",
+      "integrity": "sha512-AbdFq2URW9QmXr4qbi+n+jUj0HFwFcsdUnJqWzLTacBuLrWkeFEj07iBHciXIm3uPlURg9J/C5ckLlIFqPg8oQ==",
+      "cpu": [
+        "arm64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ]
+    },
+    "node_modules/@clerk/cli-linux-arm64-musl": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-linux-arm64-musl/-/cli-linux-arm64-musl-4.0.0.tgz",
+      "integrity": "sha512-rdXh+nglvSKQT0OzdRKmnYPOq9VjH67ZpwoM52DcsGFRbb85L9aFmz+4Lpn17fr2TxLfixmCTHbuHpbJr71Wnw==",
+      "cpu": [
+        "arm64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ]
+    },
+    "node_modules/@clerk/cli-linux-x64": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-linux-x64/-/cli-linux-x64-4.0.0.tgz",
+      "integrity": "sha512-ZqDcMXQV2OZg3C3Ee5JVq8qk+4rmK/o3bp4znp//1p34PtdTaViVPOjz8VEIooYGOo85lCBefEvYD9a9jGSRmg==",
+      "cpu": [
+        "x64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ]
+    },
+    "node_modules/@clerk/cli-linux-x64-musl": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-linux-x64-musl/-/cli-linux-x64-musl-4.0.0.tgz",
+      "integrity": "sha512-LRWumAtGcGx8VbXltG6AyRhwX6QxaWcKS4m/Zz9es27O27EmUMUTmj4YItXRx8KpBWCfWULOrabroCUN8vfJ+g==",
+      "cpu": [
+        "x64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ]
+    },
+    "node_modules/@clerk/cli-win32-arm64": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-win32-arm64/-/cli-win32-arm64-4.0.0.tgz",
+      "integrity": "sha512-ZZkj2c9iaE2HgFOJOghQu2zS2g/f2cG4ULwuNl0P/V1N40LKzHA5/slVJb251QXAPb8nYGeSlKaD/3teB9JxcQ==",
+      "cpu": [
+        "arm64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "win32"
+      ]
+    },
+    "node_modules/@clerk/cli-win32-x64": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/@clerk/cli-win32-x64/-/cli-win32-x64-4.0.0.tgz",
+      "integrity": "sha512-WwdOtSAD/Ia4robOFzaXFKUL2QzmE3QA98KLl2TPLoUJVRB1oiSPLDOT9bwb+SPcpB49dVri7nWRa7nbC1wztQ==",
+      "cpu": [
+        "x64"
+      ],
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "win32"
+      ]
+    }
+  }
+}

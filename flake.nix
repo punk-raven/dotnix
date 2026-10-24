@@ -29,7 +29,7 @@
     # flake; wired into the Linux/WSL package set (macOS gets it via Homebrew in
     # modules/darwin.nix). Pinned to a release tag; `nix flake update herdr` bumps.
     herdr = {
-      url = "github:ogulcancelik/herdr/v0.9.3";
+      url = "github:ogulcancelik/herdr/v0.9.5";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # nixGL - injects a working GL/EGL/Vulkan driver into Nix-built GUI apps on

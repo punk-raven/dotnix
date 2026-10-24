@@ -62,26 +62,26 @@ in
 {
   gh-axi = mkAxi {
     pname = "gh-axi";
-    version = "0.1.36";
+    version = "0.1.43";
     binPath = "dist/bin/gh-axi.js";
-    srcHash = "sha256-y+VGmIdc2qXLL57poQ6ZgDegaR3jyHjrMeMsQfALAq8=";
+    srcHash = "sha256-xHGr9V5Mhw/RTuA0dz3Crc7DgASQdq92bqCkar/4eCE=";
     pnpmHash = "sha256-2vlp9u0I8gb5/VGEQwS9Z57/wOMzV+YW6U+/JL482d0=";
   };
 
   chrome-devtools-axi = mkAxi {
     pname = "chrome-devtools-axi";
-    version = "0.1.39";
+    version = "0.1.44";
     binPath = "dist/bin/chrome-devtools-axi.js";
-    srcHash = "sha256-XP/+6qumcJHmX5UrZb8R00mmwXVPtLtNCJUnYNsqGgc=";
+    srcHash = "sha256-r+W3k58Duwq4Z+Vg0rr6Ma2K6E3LqSs/NiV1jMOcu8g=";
     pnpmHash = "sha256-MhpAmNmUAB8M0p8AlJpw80iRgWIdvKOjv88XAjFqYaU=";
   };
 
   lavish-axi = mkAxi {
     pname = "lavish-axi";
-    version = "0.1.85";
+    version = "0.1.90";
     binPath = "dist/cli.mjs";
     # lavish's `pnpm build` = node scripts/build.js (mkAxi's default buildScript runs it)
-    srcHash = "sha256-t/r672iCFBY4JrV8cOMRifYKdyt5d6lPi9+L/TOS2Zw=";
+    srcHash = "sha256-S+WhKGMaj98pizczXA6HsZqNKPBTCO9MYKxce/WTkNY=";
     pnpmHash = "sha256-kZ//hT7zRQWt/fdd9Wj3NF6Napmrr6L7YVmXbRLVJ2Q=";
   };
 
@@ -95,9 +95,9 @@ in
 
   quota-axi = mkAxi {
     pname = "quota-axi";
-    version = "0.1.60";
+    version = "0.1.65";
     binPath = "dist/bin/quota-axi.js";
-    srcHash = "sha256-hnoF6v5QDqagxG7Fq6zxEc6whbp71ULId+kxxHCN2To=";
+    srcHash = "sha256-TLzGRYEGw1ele+0HOHgHoBFIs7HPDQUsUKj6EzmBfmQ=";
     pnpmHash = "sha256-6iItfcjzCzU2MwEgAsLJrJDG8Rr1TNrWV7/xvJN+fPc=";
   };
 

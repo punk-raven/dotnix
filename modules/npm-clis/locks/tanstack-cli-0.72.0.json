@@ -1,16 +1,16 @@
 {
   "name": "@tanstack/cli",
-  "version": "0.71.1",
+  "version": "0.72.0",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "@tanstack/cli",
-      "version": "0.71.1",
+      "version": "0.72.0",
       "license": "MIT",
       "dependencies": {
         "@clack/prompts": "^0.10.0",
-        "@tanstack/create": "0.70.1",
+        "@tanstack/create": "0.71.0",
         "chalk": "^5.4.1",
         "chokidar": "^3.6.0",
         "commander": "^13.1.0",
@@ -71,9 +71,9 @@
       }
     },
     "node_modules/@tanstack/create": {
-      "version": "0.70.1",
-      "resolved": "https://registry.npmjs.org/@tanstack/create/-/create-0.70.1.tgz",
-      "integrity": "sha512-S1W4EWt3spjBbo1UEuhusNRWU92xXxOZn7mLUxG+wwTyNTyuKshSGj5oiAkHj0UucFjkyrM73bua2cQOYBhP/g==",
+      "version": "0.71.0",
+      "resolved": "https://registry.npmjs.org/@tanstack/create/-/create-0.71.0.tgz",
+      "integrity": "sha512-TN+z6Sq2PhFIQt9U8y0HYMnNJmtbFWKRfQjpc2qLVICWVeLWd1J5Rw1WXW0uvckmiJWIGUtL1BJ9jD3SRL28Kw==",
       "license": "MIT",
       "dependencies": {
         "ejs": "^3.1.10",
@@ -427,9 +427,9 @@
       }
     },
     "node_modules/ignore": {
-      "version": "7.0.12",
-      "resolved": "https://registry.npmjs.org/ignore/-/ignore-7.0.12.tgz",
-      "integrity": "sha512-/8UvqAPU9DGTI9k4mxtf49U37Isfwr8Uts96+SBHIkFxPJnHS0Ew4f00sM4Scd8V8EjM0jUNtVDdv1kPdt35lg==",
+      "version": "7.0.13",
+      "resolved": "https://registry.npmjs.org/ignore/-/ignore-7.0.13.tgz",
+      "integrity": "sha512-2E8Q6rh+1RRSq/YdaGsNfXsEZy9FVqv6BSSrkmZJP7BnaoPnRfKL+YaofPvP+5rzdk144qSm6i4+hvPgUcbV4Q==",
       "license": "MIT",
       "engines": {
         "node": ">= 4"
@@ -674,9 +674,9 @@
       }
     },
     "node_modules/prettier": {
-      "version": "3.9.9",
-      "resolved": "https://registry.npmjs.org/prettier/-/prettier-3.9.9.tgz",
-      "integrity": "sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==",
+      "version": "3.9.10",
+      "resolved": "https://registry.npmjs.org/prettier/-/prettier-3.9.10.tgz",
+      "integrity": "sha512-skGHTH1Yb9QvaTC4hWnRTzEYtCpApF0UMBPz+t/0ZPzP8ihefo/btKd+QA7pUE0fEwA1SbS/NmhyEcstdXOIdA==",
       "license": "MIT",
       "bin": {
         "prettier": "bin/prettier.cjs"

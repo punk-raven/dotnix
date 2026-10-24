@@ -1,7 +1,7 @@
 { pkgs, lib, ... }:
 
 let
-  version = "20.0.26";
+  version = "20.0.40";
 
   # ccusage (https://github.com/ccusage/ccusage): a Rust CLI that analyzes
   # coding-agent token usage and cost from local data (Claude Code, Codex,
@@ -20,10 +20,10 @@ let
   #   nix store prefetch-file --json \
   #     https://registry.npmjs.org/@ccusage/ccusage-<os>-<arch>/-/ccusage-<os>-<arch>-<VER>.tgz
   sources = {
-    "aarch64-darwin" = { pkg = "ccusage-darwin-arm64"; hash = "sha256-U3FAaCHuIgkzCTDg79I+0Sj8u2G9iXWPdaPOEyHIy/8="; };
-    "x86_64-darwin"  = { pkg = "ccusage-darwin-x64"; hash = "sha256-hdjxpxULehMIyeL0Tp3PFL65kDMrOkcbW/EOoBCxqEc="; };
-    "aarch64-linux"  = { pkg = "ccusage-linux-arm64"; hash = "sha256-oESgrBwYNtukSDls8+UHfo8NBlDfwmsVvlnbtawUFCc="; };
-    "x86_64-linux"   = { pkg = "ccusage-linux-x64"; hash = "sha256-agG5D2HaReWue5bQtRSloJ6hQCCLoZNxHn5Z0huCMts="; };
+    "aarch64-darwin" = { pkg = "ccusage-darwin-arm64"; hash = "sha256-bwGifgYGF8BM7oBCHkIhshuAUn2DDazLLikXNdtfrYE="; };
+    "x86_64-darwin"  = { pkg = "ccusage-darwin-x64"; hash = "sha256-u+no+7HKboU4pj7aalVDxyDgFl8Nyzn7fxpA5EpfOdc="; };
+    "aarch64-linux"  = { pkg = "ccusage-linux-arm64"; hash = "sha256-X89j4odtfl9Gu4Y3nmEBtRh/hesc8NXnZrkcNB80AQs="; };
+    "x86_64-linux"   = { pkg = "ccusage-linux-x64"; hash = "sha256-dQMEJrB9xWGv2SQKlC4nO8QSYLaLBoLnZojlfTcRqgk="; };
   };
   source = sources.${pkgs.stdenv.hostPlatform.system};
 

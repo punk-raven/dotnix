@@ -114,6 +114,28 @@ let
     zshenvFiles != { }
     && builtins.length zshenvSplit == 2
     && lib.hasInfix "hm-session-vars.sh" (builtins.head zshenvSplit);
+
+  # Pinned nixpkgs ships bun 1.3.13; pin 1.4.3 to match the self-managed
+  # ~/.bun/bin/bun that wins on PATH. The nixpkgs derivation takes `src` from
+  # `finalAttrs.passthru.sources`; `src` is restated here so nixpkgs sees the
+  # version and source change together. Same release URLs as nixpkgs
+  # (x86_64-darwin uses the -baseline zip); keep all four hashes in sync when
+  # bumping.
+  bun = pkgs.bun.overrideAttrs (finalAttrs: prev: {
+    version = "1.4.3";
+    src = finalAttrs.passthru.sources.${pkgs.stdenv.hostPlatform.system};
+    passthru = prev.passthru // {
+      sources = lib.mapAttrs (_: { asset, hash }: pkgs.fetchurl {
+        url = "https://github.com/oven-sh/bun/releases/download/bun-v${finalAttrs.version}/bun-${asset}.zip";
+        inherit hash;
+      }) {
+        aarch64-darwin = { asset = "darwin-aarch64";      hash = "sha256-gK/UwGm0am+o8+xSC+vHUKeEPkqNW5WD0prUNsAKNAM="; };
+        x86_64-darwin  = { asset = "darwin-x64-baseline"; hash = "sha256-D94E6LCSFWuX/mQy6Jm68W2e1s5Sy7QhjS2cB6L4J+8="; };
+        aarch64-linux  = { asset = "linux-aarch64";       hash = "sha256-76mBPaXtckI7+Ef5FujSxHwNd2rdlyNUAmp14Q2pqiE="; };
+        x86_64-linux   = { asset = "linux-x64";           hash = "sha256-PnMFKNiXdfA/h/BcBnh8TfQJnQo38/JS57gpyyOBbhg="; };
+      };
+    };
+  });
 in
 {
   imports = [

@@ -345,7 +345,7 @@ installer already do this for you).
 - **Node** (all platforms): `nvm` plus a pinned default LTS Node, installed on
   the first activation - see [Node and `nvm`](#node-and-nvm).
 - **Agent tooling** (all platforms): `gh-axi`, `chrome-devtools-axi`,
-  `lavish-axi`, `tasks-axi`, `ccusage`, `codegraph` - each pinned and
+  `lavish-axi`, `tasks-axi`, `ccusage`, `codegraph`, `railway` - each pinned and
   reproducible, with the Linux/Intel release artifacts selected
   automatically by `system`. The pinned build is also the one that *runs*: see
   [PATH precedence](#path-precedence) for why that needs saying.
@@ -669,7 +669,7 @@ modules/
   gui.nix                 cross-platform GUI apps (wezterm)
   nvm.nix                 SHARED: pinned nvm + default LTS Node (activation, not a package)
   floci.nix               SHARED: pinned floci CLI (local AWS/GCP/Azure/OCI emulator)
-  agent-tooling/          axi, ccusage, codegraph (system-keyed sources)
+  agent-tooling/          axi, ccusage, codegraph, railway (system-keyed sources)
 files/                    dotfiles symlinked by home-manager (nvim, wezterm, herdr, agent cfg)
 install.sh                POSIX entry point: macOS + Linux + inside-WSL
 install.ps1               Windows: enable WSL2, install distro, hand to install.sh

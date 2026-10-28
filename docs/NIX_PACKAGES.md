@@ -55,6 +55,7 @@ default you set yourself is never overwritten.
 | `axi.nix` | `gh-axi`, `chrome-devtools-axi`, `lavish-axi`, `tasks-axi` (+ pinned `chrome-devtools-mcp` engine as dep) |
 | `ccusage.nix` | `ccusage` |
 | `codegraph.nix` | `codegraph` |
+| `railway.nix` | `railway` (+ pinned `use-railway` skill, `railway` MCP for Claude Code and Codex) |
 
 Release artifacts are selected by `system`, so Linux and Intel hosts pull their
 own binaries from the same pinned versions.

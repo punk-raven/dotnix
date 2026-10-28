@@ -15,6 +15,14 @@ hooks = true
 command = "codegraph"
 args = ["serve", "--mcp"]
 
+# Railway MCP server - `railway mcp` is the stdio proxy to mcp.railway.com
+# (auth via `railway login`). The `railway` binary is put on PATH by
+# modules/agent-tooling/railway.nix. Declarative equivalent of
+# `railway setup agent` (which we do NOT run - it replaces this symlinked file).
+[mcp_servers.railway]
+command = "railway"
+args = ["mcp"]
+
 [marketplaces.sentry-plugin-marketplace]
 last_updated = "2026-08-06T15:05:27Z"
 last_revision = "b65e58bb75ffb1e5ff9955ab8ea4743887873fbb"

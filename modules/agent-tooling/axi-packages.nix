@@ -101,58 +101,37 @@ in
     pnpmHash = "sha256-6iItfcjzCzU2MwEgAsLJrJDG8Rr1TNrWV7/xvJN+fPc=";
   };
 
-  # Pinned to v1.6.0: v1.7.0+ added devtools-frontend as a git submodule
-  # whose nested submodules live on chrome-internal.googlesource.com
-  # (requires Google auth), making fetchSubmodules impossible in a public
-  # Nix build.
-  chrome-devtools-mcp = let version = "1.6.0"; in pkgs.buildNpmPackage {
+  # The engine chrome-devtools-axi drives through CHROME_DEVTOOLS_AXI_MCP_PATH
+  # (axi.nix). It must be 1.8.0 or newer: chrome-devtools-axi sends `pageId` on
+  # every page-scoped tool call, and only 1.8.0+ accepts it by default
+  # (`--pageIdRouting`, on by default; 1.7.0 had it behind
+  # --experimentalPageIdRouting). 1.6.0 rejects it: "Unknown argument for tool
+  # take_snapshot: pageId".
+  #
+  # Installed from the registry tarball, not built from source: since v1.7.0
+  # the repo carries devtools-frontend as a git submodule whose nested
+  # submodules live on chrome-internal.googlesource.com (requires Google
+  # auth), so a source build cannot fetch them. The published tarball is the
+  # rollup bundle upstream ships (`npm run bundle`) and declares no
+  # dependencies, so it runs as-is - the same files `npx chrome-devtools-mcp`
+  # installs. To bump: change version, then
+  #   nix store prefetch-file --hash-type sha256 <tarball url>  -> hash
+  chrome-devtools-mcp = let version = "1.12.0"; in pkgs.stdenvNoCC.mkDerivation {
     pname = "chrome-devtools-mcp";
     inherit version;
-    # Task 2 established that pinned pkgs.nodejs (24.x) SIGKILLs under real
-    # npm/pnpm install load on Darwin; use the same nodejs_22 pin here.
-    nodejs = nodejs;   # the `nodejs = pkgs.nodejs_22;` binding from the let block
-    src = pkgs.fetchFromGitHub {
-      owner = "ChromeDevTools";
-      repo = "chrome-devtools-mcp";
-      rev = "chrome-devtools-mcp-v${version}";
-      hash = "sha256-aHbBrM/bluFjFRUfJkbxGZpdm0m3XAcAiScARKsnIm4=";
+    src = pkgs.fetchurl {
+      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-${version}.tgz";
+      hash = "sha256-Sq3jFnw+eBx5fWEJ7WA6DKW4yzY6KJ4uqsqpsMXSo2A=";
     };
-    npmDepsHash = "sha256-Aqin4Y///f1j4MWcG3gA4FGvIfC4lBEGKaKfAMSFdDw=";
-    # The default `npmBuildScript` ("build" = `tsc && node scripts/post-build.ts`)
-    # only type-checks/transpiles; the resulting build/src/*.js still `import`s
-    # devDependencies (e.g. urlpattern-polyfill) straight from node_modules,
-    # which buildNpmPackage's `npm prune --omit=dev` then removes, breaking
-    # the binary at runtime (ERR_MODULE_NOT_FOUND). The package's own "bundle"
-    # script (clean -> build -> rollup -> strip build/node_modules -> append
-    # lighthouse notices) is what upstream actually publishes to npm - rollup
-    # inlines devDependencies into build/src, leaving essentially no runtime
-    # node_modules requirement. Verified by diffing against `npm pack
-    # chrome-devtools-mcp@1.5.0`: the published build/src is rollup-bundled
-    # (minified helper names), matching `npm run bundle` output, not `npm run
-    # build` output.
-    npmBuildScript = "bundle";
-    # The "bundle" script's rollup pass is memory-heavy. Node 22 auto-sizes
-    # V8's old-space limit from *available* RAM; under WSL2 the reported
-    # figure is small (WSL defaults to ~50% of Windows RAM and under-reports),
-    # so V8 caps the heap low and rollup dies with "Reached heap limit
-    # Allocation failed - JavaScript heap out of memory". Pin a fixed 4 GB
-    # heap so the build is deterministic across hosts regardless of how much
-    # RAM the sandbox thinks it has.
-    NODE_OPTIONS = "--max-old-space-size=4096";
-    # prevent puppeteer/chromium download during build:
-    PUPPETEER_SKIP_DOWNLOAD = "1";
-    # buildNpmPackage always runs `npm ci --ignore-scripts`, so npm's
-    # "prepare" lifecycle script (which normally runs on a real
-    # `npm install`) never fires. That script is load-bearing: it strips a
-    # conflicting `declare global` block that chrome-devtools-frontend and
-    # @paulirish/trace_engine both declare, which otherwise makes `tsc` fail
-    # with TS2717 ("Subsequent property declarations must have the same
-    # type"). Reproduced without this step (both under nix build and with a
-    # plain `npm ci --ignore-scripts && npm run build` outside nix, using the
-    # same pinned nodejs_22). Run the upstream fixup script itself, verbatim,
-    # right before the build runs.
-    preBuild = ''
-      node scripts/prepare.ts
+    dontBuild = true;
+    # Same layout as an npm global install, so the path axi.nix exports is
+    # stable across bumps. chrome-devtools-axi runs it with its own node
+    # (nodejs_22 above), so no wrapper or shebang patching is needed.
+    installPhase = ''
+      runHook preInstall
+      mkdir -p "$out/lib/node_modules/chrome-devtools-mcp"
+      cp -R . "$out/lib/node_modules/chrome-devtools-mcp/"
+      runHook postInstall
     '';
   };
 }
